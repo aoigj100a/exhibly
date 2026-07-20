@@ -1,0 +1,48 @@
+generator client {  
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// 展覽
+model Exhibition {
+  id          String   @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String?
+  city        String?
+  venue       String?
+  location    String?
+  ticketUrl   String?
+  imageUrl    String?
+
+  tags        ExhibitionTag[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 主題 (動漫、療癒、科技藝術…)
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  category    String   // "SUBJECT" 或 "MOOD"（SQLite 不支援 enum，M6 換 PostgreSQL 時升級）
+
+  exhibitions ExhibitionTag[]
+
+  createdAt   DateTime @default(now())
+}
+
+// 中間表：連接展覽與主題的多對多關係
+model ExhibitionTag {
+  exhibition   Exhibition @relation(fields: [exhibitionId], references: [id], onDelete: Cascade)
+  exhibitionId String
+  tag          Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId        String
+
+  @@id([exhibitionId, tagId])
+}
