@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@exhibly/db";
 
 export default async function Home() {
@@ -6,7 +7,9 @@ export default async function Home() {
   return (
     <ul>
       {exhibitions.map((e) => (
-        <li key={e.id}>{e.name}</li>
+        <li key={e.id}>
+          <Link href={`/exhibition/${e.id}`}>{e.name}</Link>
+        </li>
       ))}
     </ul>
   );
