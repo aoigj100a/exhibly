@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    "./globals.css": "./src/styles/globals.css",
     "./*": "./src/*.tsx"
   },
   "scripts": {
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.3.3"
   }
 }

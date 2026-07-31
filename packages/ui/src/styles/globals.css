@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@source "../../../../apps/web/app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+
+@theme {
+  --color-brand: #d85a30;
+  --radius: 0.5rem;
+}
