@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@exhibly/db": "workspace:^",
-    "@repo/ui": "workspace:*",
+    "@exhibly/ui": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.3",
     "next": "16.2.0",
+    "postcss": "^8.5.25",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
