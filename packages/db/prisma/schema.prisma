@@ -19,6 +19,7 @@ model Exhibition {
   location    String?
   ticketUrl   String?
   imageUrl    String?
+  isFree      Boolean? // true=免費/false=收費/null=未知
 
   tags        ExhibitionTag[]
 
