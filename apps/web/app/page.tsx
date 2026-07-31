@@ -1,38 +1,24 @@
 import Link from "next/link";
 import { prisma } from "@exhibly/db";
-import TagFilter from "./TagFilter"; // 引入刚做的选单
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ tags?: string }>;
-}) {
-  const { tags } = await searchParams;
-  const selectedTags = tags ? tags.split(",") : [];
+const featured = ["動漫", "療癒", "原住民文化", "當代藝術", "沉浸式", "好拍"];
 
-  // 撈所有标签，传给选单显示（读资料是 Server Component 的事）
-  const allTags = await prisma.tag.findMany();
-
-  // 撈展览：有选标签就 OR 筛选，没选就全部
-  const exhibitions = await prisma.exhibition.findMany({
-    where: selectedTags.length
-      ? { tags: { some: { tag: { name: { in: selectedTags } } } } }
-      : undefined,
-  });
-
+export default async function Home() {
   return (
     <div>
-      {/* 选单：把撈好的标签资料传进去 */}
-      <TagFilter tags={allTags} />
+      <h1>Exhibly</h1>
+      <p>用主題逛台灣的展覽</p>
 
-      {/* 结果列表 */}
-      <ul>
-        {exhibitions.map((e) => (
-          <li key={e.id}>
-            <Link href={`/exhibition/${e.id}`}>{e.name}</Link>
-          </li>
+      {/* 精选主题：每个连到带 ?tags= 的筛选页 */}
+      <div>
+        {featured.map((name) => (
+          <Link key={name} href={`/list?tags=${name}`}>
+            {name}
+          </Link>
         ))}
-      </ul>
+      </div>
+
+      <Link href="/list">看全部展覽</Link>
     </div>
   );
 }
