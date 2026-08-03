@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { prisma } from "@exhibly/db";
+import { Button } from "@exhibly/ui/components/button"
 
 const featured = ["動漫", "療癒", "原住民文化", "當代藝術", "沉浸式", "好拍"];
 
 export default async function Home() {
   return (
     <div>
+      <Button>測試</Button>
       <h1>Exhibly</h1>
       <p>用主題逛台灣的展覽</p>
 

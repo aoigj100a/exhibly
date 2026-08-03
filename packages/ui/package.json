@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./globals.css": "./src/styles/globals.css",
-    "./*": "./src/*.tsx"
+   "./globals.css": "./src/styles/globals.css",
+  "./lib/utils": "./src/lib/utils.ts",
+  "./components/*": "./src/components/*.tsx",
+  "./*": "./src/*.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -21,8 +23,13 @@
     "typescript": "5.9.2"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.28.0",
+    "radix-ui": "^1.6.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3"
   }
 }
