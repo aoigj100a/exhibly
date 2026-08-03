@@ -1,43 +1,52 @@
-"use client"
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@exhibly/ui/components/button";
 
 export default function TagFilter({
-    tags,
+  tags,
 }: {
-    tags: { id: string; name: string; category: string }[];
+  tags: { id: string; name: string; category: string }[];
 }) {
-    const router = useRouter();
-    const searchParams = useSearchParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-    const current = searchParams.get("tags");
-    const selected = current ? current.split(",") : [];
+  const current = searchParams.get("tags");
+  const selected = current ? current.split(",") : [];
 
-    // 点一个标签：已选就移除、没选就加入（这就是「可勾可退」的切换逻辑）
-    function toggle(name: string) {
-        const next = selected.includes(name)
-            ? selected.filter((n) => n !== name) // 再点一次 → 取消选取
-            : [...selected, name];               // 第一次点 → 加进清单
+  // 點一個標籤：已選就移除、沒選就加入（可勾可退的切換邏輯）
+  function toggle(name: string) {
+    const next = selected.includes(name)
+      ? selected.filter((n) => n !== name) // 再點一次 → 取消選取
+      : [...selected, name];               // 第一次點 → 加進清單
 
-        // 把新的清单写回网址。有选就 ?tags=a,b，全空就回到乾净网址
-        const query = next.length ? `?tags=${next.join(",")}` : "/";
-        router.push(query); // ← 改网址。网址一变，Server Component 会重跑、重新查询
+    // 用 URLSearchParams 組網址：它會自動處理中文編碼，跟首頁的 encodeURIComponent 對得起來。
+    // 全空時導回 /list（篩選頁本身），不是 "/"（那是首頁，會把使用者彈走）。
+    if (next.length === 0) {
+      router.push("/list");
+      return;
     }
+    const params = new URLSearchParams();
+    params.set("tags", next.join(","));
+    router.push(`/list?${params.toString()}`);
+  }
 
-    return (
-        <div>
-            {tags.map((tag) => (
-                <button
-                    key={tag.id}
-                    onClick={() => toggle(tag.name)}
-                    // 已选中的标签给个记号，让用户看得出选了哪些
-                    style={{
-                        fontWeight: selected.includes(tag.name) ? "bold" : "normal",
-                    }}
-                >
-                    {tag.name}
-                </button>
-            ))}
-        </div>
-    );
+  return (
+    <div className="flex flex-wrap gap-2">
+      {tags.map((tag) => {
+        const isSelected = selected.includes(tag.name);
+        return (
+          <Button
+            key={tag.id}
+            onClick={() => toggle(tag.name)}
+            // 選中 = 實心(default)、未選 = 描邊(outline)，實心/空心對比比粗細清楚
+            variant={isSelected ? "default" : "outline"}
+            size="sm"
+          >
+            {tag.name}
+          </Button>
+        );
+      })}
+    </div>
+  );
 }

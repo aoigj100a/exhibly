@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@exhibly/db";
+import { Card, CardContent } from "@exhibly/ui/components/card";
+import ExhibitionImage from "../components/ExhibitionImage";
 import TagFilter from "../TagFilter";
 
 export default async function ListPage({
@@ -12,6 +14,7 @@ export default async function ListPage({
 
   const allTags = await prisma.tag.findMany();
 
+  // 這句是 M2 早就寫通的多對多篩選 query，原封不動
   const exhibitions = await prisma.exhibition.findMany({
     where: selectedTags.length
       ? { tags: { some: { tag: { name: { in: selectedTags } } } } }
@@ -19,15 +22,37 @@ export default async function ListPage({
   });
 
   return (
-    <div>
-      <TagFilter tags={allTags} />
-      <ul>
-        {exhibitions.map((e) => (
-          <li key={e.id}>
-            <Link href={`/exhibition/${e.id}`}>{e.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <main className="mx-auto max-w-2xl px-4 py-8">
+      <div className="mb-6">
+        <TagFilter tags={allTags} />
+      </div>
+
+      {exhibitions.length === 0 ? (
+        // 篩選後可能一筆都不符合，給明確的空狀態，不要只是空白
+        <p className="py-12 text-center text-muted-foreground">
+          沒有符合的展覽，試試調整篩選條件。
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {exhibitions.map((e) => (
+            <Link key={e.id} href={`/exhibition/${e.id}`} className="group block">
+              <Card className="overflow-hidden transition-colors group-hover:border-primary">
+                <div className="flex items-center gap-4">
+                  {/* 列表縮圖：同一個共用組件，換成小方圖尺寸。沒圖一樣顯示占位 */}
+                  <ExhibitionImage
+                    src={e.imageUrl}
+                    alt={e.name}
+                    className="h-20 w-20 shrink-0"
+                  />
+                  <CardContent className="p-4 pl-0">
+                    <span className="font-medium">{e.name}</span>
+                  </CardContent>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
