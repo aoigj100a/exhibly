@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@exhibly/db";
 import { Card, CardContent } from "@exhibly/ui/components/card";
 import ExhibitionImage from "../components/ExhibitionImage";
-import TagFilter from "../TagFilter";
+import TagFilter from "../components/TagFilter";
 
 export default async function ListPage({
   searchParams,
