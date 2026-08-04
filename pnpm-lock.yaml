@@ -106,9 +106,6 @@ importers:
 
   packages/db:
     dependencies:
-      '@exhibly/db':
-        specifier: workspace:^
-        version: 'link:'
       '@prisma/adapter-pg':
         specifier: ^7.9.1
         version: 7.9.1
