@@ -43,6 +43,7 @@ export default async function ListPage({
                     src={e.imageUrl}
                     alt={e.name}
                     className="h-20 w-20 shrink-0"
+                    sizes="80px"
                   />
                   <CardContent className="p-4 pl-0">
                     <span className="font-medium">{e.name}</span>

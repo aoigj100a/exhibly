@@ -49,6 +49,7 @@ export default async function ExhibitionDetail({
           src={exhibition.imageUrl}
           alt={exhibition.name}
           className="aspect-[16/9] w-full"
+          sizes="(min-width: 672px) 672px, 100vw"
         />
 
         <CardHeader>
