@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@exhibly/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@exhibly/ui/components/card";
 import { Badge } from "@exhibly/ui/components/badge";
 import ExhibitionImage from "../../components/ExhibitionImage";
 import { tagToHsl } from "@/lib/tagColor";
@@ -43,24 +42,51 @@ export default async function ExhibitionDetail({
   )}`;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <Card className="overflow-hidden">
-        {/* 圖片區：占位邏輯已抽成共用組件，尺寸靠 className 從外部給 */}
-        <ExhibitionImage
-          src={exhibition.imageUrl}
-          alt={exhibition.name}
-          tags={exhibition.tags.map((et) => et.tag.name)}
-          className="aspect-[16/9] w-full"
-          sizes="(min-width: 672px) 672px, 100vw"
-        />
+    <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
+      {/* 圖／展牌是這頁的主視覺，比例維持 16:9 不變 */}
+      <ExhibitionImage
+        src={exhibition.imageUrl}
+        alt={exhibition.name}
+        tags={exhibition.tags.map((et) => et.tag.name)}
+        className="aspect-[16/9] w-full"
+        sizes="(min-width: 672px) 672px, 100vw"
+      />
 
-        <CardHeader>
-          <CardTitle className="text-2xl">{exhibition.name}</CardTitle>
+      {/* 展覽名當大標，是這頁的主角 */}
+      <h1 className="mt-8 text-3xl font-bold tracking-tight sm:mt-12 sm:text-5xl">
+        {exhibition.name}
+      </h1>
 
-          {/* 標籤：用 Badge 呈現，背景色跟展牌同一套 tagToHsl，深色字維持可讀。
-              沒有標籤時整區不渲染，不留空殼 */}
-          {exhibition.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2">
+      {/* 資訊區：label/value 兩欄網格，手機收成上下堆疊。呼應美術館展牌
+          說明卡（標題／媒材／年代並列）的排版邏輯，缺值的欄位直接不渲染那一列。 */}
+      <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-border pt-8 sm:mt-10 sm:grid-cols-[120px_1fr] sm:gap-y-6 sm:pt-10">
+        {/* 日期一定有值（schema 為必填），直接顯示 */}
+        <dt className="text-sm font-medium text-muted-foreground">展期</dt>
+        <dd className="text-sm">{dateRange}</dd>
+
+        {/* 以下皆為 nullable，有值才渲染那一組 dt/dd */}
+        {place && (
+          <>
+            <dt className="text-sm font-medium text-muted-foreground">地點</dt>
+            <dd className="text-sm">{place}</dd>
+          </>
+        )}
+
+        {exhibition.isFree !== null && (
+          <>
+            <dt className="text-sm font-medium text-muted-foreground">票價</dt>
+            <dd>
+              <Badge variant={exhibition.isFree ? "default" : "outline"}>
+                {exhibition.isFree ? "免費" : "收費"}
+              </Badge>
+            </dd>
+          </>
+        )}
+
+        {exhibition.tags.length > 0 && (
+          <>
+            <dt className="text-sm font-medium text-muted-foreground">標籤</dt>
+            <dd className="flex flex-wrap gap-2">
               {exhibition.tags.map((et) => (
                 <Badge
                   key={et.tagId}
@@ -71,30 +97,19 @@ export default async function ExhibitionDetail({
                   {et.tag.name}
                 </Badge>
               ))}
-            </div>
-          )}
-        </CardHeader>
+            </dd>
+          </>
+        )}
 
-        <CardContent className="space-y-4">
-          {/* 日期一定有值（schema 為必填），直接顯示 */}
-          <p className="text-sm text-muted-foreground">{dateRange}</p>
-
-          {/* 以下皆為 nullable，有值才渲染那一行 */}
-          {place && <p className="text-sm">{place}</p>}
-
-          {exhibition.isFree !== null && (
-            <Badge variant={exhibition.isFree ? "default" : "outline"}>
-              {exhibition.isFree ? "免費" : "收費"}
-            </Badge>
-          )}
-
-          {exhibition.description && (
-            <p className="leading-relaxed whitespace-pre-line">
+        {exhibition.description && (
+          <>
+            <dt className="text-sm font-medium text-muted-foreground">簡介</dt>
+            <dd className="text-sm leading-relaxed whitespace-pre-line">
               {exhibition.description}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            </dd>
+          </>
+        )}
+      </dl>
     </main>
   );
 }

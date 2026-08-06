@@ -28,12 +28,13 @@ export default function ExhibitionImage({
 
     return (
       <div
-        className={`relative flex items-center justify-center overflow-hidden p-3 text-center ${className}`}
+        className={`relative flex items-center justify-center overflow-hidden p-4 text-center ${className}`}
         style={getPlaqueBackground(tags)}
       >
         {/* 對比不足時疊極淡遮罩，不動字色邏輯本身 */}
         {showOverlay && <div className="absolute inset-0 bg-white/40" />}
-        <span className="relative z-10 line-clamp-3 text-sm leading-snug font-bold text-gray-800 sm:text-base">
+        {/* 圖片區在列表/詳情頁都是主視覺尺寸的容器了，字級跟著放大撐住份量 */}
+        <span className="relative z-10 line-clamp-3 text-base leading-snug font-bold text-gray-800 sm:text-xl">
           {alt}
         </span>
       </div>

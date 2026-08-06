@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { prisma } from "@exhibly/db";
-import { Card, CardContent } from "@exhibly/ui/components/card";
 import ExhibitionImage from "../components/ExhibitionImage";
 import TagFilter from "../components/TagFilter";
 
@@ -24,35 +23,34 @@ export default async function ListPage({
   });
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-6">
+    <main className="mx-auto max-w-6xl px-6 py-12 sm:px-8 sm:py-16 lg:px-12">
+      <div className="mb-10 sm:mb-14">
         <TagFilter tags={allTags} />
       </div>
 
       {exhibitions.length === 0 ? (
         // 篩選後可能一筆都不符合，給明確的空狀態，不要只是空白
-        <p className="py-12 text-center text-muted-foreground">
+        <p className="py-24 text-center text-muted-foreground">
           沒有符合的展覽，試試調整篩選條件。
         </p>
       ) : (
-        <div className="space-y-3">
+        // 畫廊網格：圖片為主視覺、標題退居其下，靠底線分隔而非卡片框線陰影，
+        // 呼應「介面克制」；可點性靠 hover 底線 + 圖片微透明變化傳達，不靠色彩。
+        <div className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
           {exhibitions.map((e) => (
             <Link key={e.id} href={`/exhibition/${e.id}`} className="group block">
-              <Card className="overflow-hidden transition-colors group-hover:border-primary">
-                <div className="flex items-center gap-4">
-                  {/* 列表縮圖：同一個共用組件，換成小方圖尺寸。沒圖一樣顯示占位 */}
-                  <ExhibitionImage
-                    src={e.imageUrl}
-                    alt={e.name}
-                    tags={e.tags.map((et) => et.tag.name)}
-                    className="h-20 w-20 shrink-0"
-                    sizes="80px"
-                  />
-                  <CardContent className="p-4 pl-0">
-                    <span className="font-medium">{e.name}</span>
-                  </CardContent>
-                </div>
-              </Card>
+              <ExhibitionImage
+                src={e.imageUrl}
+                alt={e.name}
+                tags={e.tags.map((et) => et.tag.name)}
+                className="aspect-[4/3] w-full transition-opacity group-hover:opacity-90"
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
+              <div className="mt-4 border-t border-border pt-3">
+                <h2 className="text-lg leading-snug font-semibold tracking-tight group-hover:underline">
+                  {e.name}
+                </h2>
+              </div>
             </Link>
           ))}
         </div>
