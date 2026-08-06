@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@exhibly/ui/components/button";
+import { tagToHsl } from "@/lib/tagColor";
 
 export default function TagFilter({
   tags,
@@ -39,9 +40,12 @@ export default function TagFilter({
           <Button
             key={tag.id}
             onClick={() => toggle(tag.name)}
-            // 選中 = 實心(default)、未選 = 描邊(outline)，實心/空心對比比粗細清楚
+            // 選中 = 實心(該標籤的莫蘭迪色)、未選 = 描邊，實心/空心的結構性對比
+            // 不會因為色相相近就分不清楚——這是刻意保留 M2 的選中態辨識度。
             variant={isSelected ? "default" : "outline"}
             size="sm"
+            className={isSelected ? "border-transparent text-gray-800 hover:opacity-90" : undefined}
+            style={isSelected ? { backgroundColor: tagToHsl(tag.name) } : undefined}
           >
             {tag.name}
           </Button>

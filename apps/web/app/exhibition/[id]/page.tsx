@@ -3,6 +3,7 @@ import { prisma } from "@exhibly/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@exhibly/ui/components/card";
 import { Badge } from "@exhibly/ui/components/badge";
 import ExhibitionImage from "../../components/ExhibitionImage";
+import { tagToHsl } from "@/lib/tagColor";
 
 // 日期格式化：明確用 UTC 讀，避免執行環境本地時區把「純日期」往回推一天。
 // 存進 SQLite 的是 UTC 午夜（例：2026-08-01T00:00:00Z），
@@ -56,11 +57,17 @@ export default async function ExhibitionDetail({
         <CardHeader>
           <CardTitle className="text-2xl">{exhibition.name}</CardTitle>
 
-          {/* 標籤：用 Badge 呈現。沒有標籤時整區不渲染，不留空殼 */}
+          {/* 標籤：用 Badge 呈現，背景色跟展牌同一套 tagToHsl，深色字維持可讀。
+              沒有標籤時整區不渲染，不留空殼 */}
           {exhibition.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
               {exhibition.tags.map((et) => (
-                <Badge key={et.tagId} variant="secondary">
+                <Badge
+                  key={et.tagId}
+                  variant="secondary"
+                  className="text-gray-800"
+                  style={{ backgroundColor: tagToHsl(et.tag.name) }}
+                >
                   {et.tag.name}
                 </Badge>
               ))}

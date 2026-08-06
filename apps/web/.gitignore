@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 色彩實驗室:選色用的臨時頁,不進版控
+app/lab/

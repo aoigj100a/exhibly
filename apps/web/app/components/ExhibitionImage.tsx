@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { tagToHsl, NEUTRAL_PLAQUE_COLOR } from "@/lib/tagColor";
+import { getPlaqueBackground, needsContrastOverlay } from "@/lib/tagColor";
 
 // 展覽圖片：有圖顯示圖、null 或空字串顯示「展牌」（主題色背景＋展覽名大字）。
 // 三頁（詳情、篩選列表、首頁）共用這一個組件——要改占位樣式只改這裡一處。
@@ -22,16 +22,18 @@ export default function ExhibitionImage({
   const hasImage = typeof src === "string" && src.trim() !== "";
 
   if (!hasImage) {
-    // 展牌色取自第一個標籤；目前只做單標籤版本，多標籤漸層留到下一步。
-    // 完全沒標籤（理論上可能）則退回中性灰，不讓畫面開天窗。
-    const plaqueColor = tags[0] ? tagToHsl(tags[0]) : NEUTRAL_PLAQUE_COLOR;
+    // 展牌色：無標籤中性灰、單標籤純色、多標籤線性漸層（跨標籤=跨類，
+    // 漸層 vs 拼色在 /lab/colors 比較過，拼色的硬邊在莫蘭迪低彩度下太生硬，選漸層）。
+    const showOverlay = needsContrastOverlay(tags);
 
     return (
       <div
-        className={`flex items-center justify-center overflow-hidden p-3 text-center ${className}`}
-        style={{ backgroundColor: plaqueColor }}
+        className={`relative flex items-center justify-center overflow-hidden p-3 text-center ${className}`}
+        style={getPlaqueBackground(tags)}
       >
-        <span className="line-clamp-3 text-sm leading-snug font-bold text-gray-800 sm:text-base">
+        {/* 對比不足時疊極淡遮罩，不動字色邏輯本身 */}
+        {showOverlay && <div className="absolute inset-0 bg-white/40" />}
+        <span className="relative z-10 line-clamp-3 text-sm leading-snug font-bold text-gray-800 sm:text-base">
           {alt}
         </span>
       </div>
