@@ -3,6 +3,11 @@ import { prisma } from "@exhibly/db";
 import { tagToHsl } from "@/lib/tagColor";
 import ExhibitionCard from "./components/ExhibitionCard";
 
+// 首頁沒有動態路由參數，Next.js 預設會在 build time 嘗試靜態預產生，
+// 但這頁的「近期展覽」要打 DB，build 環境撈不到就整個 export 失敗。
+// 強制動態渲染，改成每次 request 時才撈，不在 build time 定死。
+export const dynamic = "force-dynamic";
+
 // 精選主題：目前寫死，之後要動態化（例如撈出展覽數最多的標籤）再改成從 db 撈。
 const featured = ["動漫", "療癒", "原住民文化", "當代藝術", "沉浸式", "好拍"];
 
