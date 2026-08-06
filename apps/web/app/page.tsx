@@ -1,10 +1,20 @@
 import Link from "next/link";
+import { prisma } from "@exhibly/db";
 import { tagToHsl } from "@/lib/tagColor";
+import ExhibitionCard from "./components/ExhibitionCard";
 
 // 精選主題：目前寫死，之後要動態化（例如撈出展覽數最多的標籤）再改成從 db 撈。
 const featured = ["動漫", "療癒", "原住民文化", "當代藝術", "沉浸式", "好拍"];
 
-export default function Home() {
+export default async function Home() {
+  // 近期展覽：依展期排序撈最近的幾筆真實資料，填補主題入口下方的空白，
+  // 用跟列表頁同一顆 ExhibitionCard，不要另外刻一種卡片長相。
+  const recentExhibitions = await prisma.exhibition.findMany({
+    orderBy: { startDate: "asc" },
+    take: 6,
+    include: { tags: { include: { tag: true } } },
+  });
+
   return (
     // 內容量小（僅 11 筆展覽、6 個精選主題），刻意不用大留白撐場——
     // 留白靠首屏標題的字級對比撐開，網格本身維持緊湊，避免顯得像沒做完。
@@ -41,6 +51,27 @@ export default function Home() {
           </Link>
         ))}
       </div>
+
+      {/* 近期展覽：跟列表頁同一套卡片，維持 Swiss 網格、手機收成一欄 */}
+      {recentExhibitions.length > 0 && (
+        <section className="mt-14 sm:mt-20">
+          {/* 字級介於 h1 主標與卡片標題之間，建立清楚的「區塊標題」層級 */}
+          <h2 className="text-2xl font-bold tracking-tight text-muted-foreground sm:text-3xl">
+            近期展覽
+          </h2>
+          <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-12 sm:mt-10 sm:grid-cols-2 sm:gap-y-14 lg:grid-cols-3">
+            {recentExhibitions.map((e) => (
+              <ExhibitionCard
+                key={e.id}
+                id={e.id}
+                name={e.name}
+                imageUrl={e.imageUrl}
+                tags={e.tags.map((et) => et.tag.name)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="mt-8 text-center sm:mt-10">
         <Link

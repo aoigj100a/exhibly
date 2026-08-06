@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { prisma } from "@exhibly/db";
-import ExhibitionImage from "../components/ExhibitionImage";
+import ExhibitionCard from "../components/ExhibitionCard";
 import TagFilter from "../components/TagFilter";
 
 export default async function ListPage({
@@ -38,20 +37,13 @@ export default async function ListPage({
         // 呼應「介面克制」；可點性靠 hover 底線 + 圖片微透明變化傳達，不靠色彩。
         <div className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
           {exhibitions.map((e) => (
-            <Link key={e.id} href={`/exhibition/${e.id}`} className="group block">
-              <ExhibitionImage
-                src={e.imageUrl}
-                alt={e.name}
-                tags={e.tags.map((et) => et.tag.name)}
-                className="aspect-[4/3] w-full transition-opacity group-hover:opacity-90"
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              />
-              <div className="mt-4 border-t border-border pt-3">
-                <h2 className="text-lg leading-snug font-semibold tracking-tight group-hover:underline">
-                  {e.name}
-                </h2>
-              </div>
-            </Link>
+            <ExhibitionCard
+              key={e.id}
+              id={e.id}
+              name={e.name}
+              imageUrl={e.imageUrl}
+              tags={e.tags.map((et) => et.tag.name)}
+            />
           ))}
         </div>
       )}
