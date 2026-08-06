@@ -4,6 +4,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "event.moc.gov.tw" },
       { protocol: "https", hostname: "res.klook.com" },
+      { protocol: "https", hostname: "imgs2.utiki.com.tw" },
     ],
   },
 };
