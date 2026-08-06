@@ -48,6 +48,7 @@ export default async function ExhibitionDetail({
         <ExhibitionImage
           src={exhibition.imageUrl}
           alt={exhibition.name}
+          tags={exhibition.tags.map((et) => et.tag.name)}
           className="aspect-[16/9] w-full"
           sizes="(min-width: 672px) 672px, 100vw"
         />

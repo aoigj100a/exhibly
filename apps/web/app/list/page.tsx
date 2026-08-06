@@ -14,11 +14,13 @@ export default async function ListPage({
 
   const allTags = await prisma.tag.findMany();
 
-  // 這句是 M2 早就寫通的多對多篩選 query，原封不動
+  // 這句是 M2 早就寫通的多對多篩選 query，篩選條件原封不動，
+  // 這次補上 include 是為了讓沒圖的展覽能拿標籤畫展牌。
   const exhibitions = await prisma.exhibition.findMany({
     where: selectedTags.length
       ? { tags: { some: { tag: { name: { in: selectedTags } } } } }
       : undefined,
+    include: { tags: { include: { tag: true } } },
   });
 
   return (
@@ -42,6 +44,7 @@ export default async function ListPage({
                   <ExhibitionImage
                     src={e.imageUrl}
                     alt={e.name}
+                    tags={e.tags.map((et) => et.tag.name)}
                     className="h-20 w-20 shrink-0"
                     sizes="80px"
                   />
