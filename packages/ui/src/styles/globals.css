@@ -6,8 +6,12 @@
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  /* 品牌橙當互動元件主色（按鈕／連結／CTA），--color-brand 定義在下面的
+     @theme 區塊。文字用深色（沿用 --foreground）而不是原本的近白色——
+     #d85a30 的亮度落在「白字不夠、黑字剛好」的區間，near-white 文字在這個
+     橘色上對比只有約 3.7:1，過不了 WCAG AA 的 4.5:1；深色字約 5:1+ 才夠看。 */
+  --primary: var(--color-brand);
+  --primary-foreground: var(--foreground);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --accent: oklch(0.97 0 0);
@@ -36,4 +40,12 @@
 @theme {
   --color-brand: #d85a30;
   --radius: 0.5rem;
+  /* --font-noto-sans-tc / --font-space-grotesk 由 apps/web/app/layout.tsx
+     的 next/font/google 產生並掛在 <html> 上。
+     --font-sans 覆蓋 Tailwind 預設字體堆疊，全站中文本文/大部分標題都走
+     Noto Sans TC；--font-display 只給 font-display 這個 utility，
+     刻意不當預設值，因為 Space Grotesk 沒有中文字符。 */
+  --font-sans: var(--font-noto-sans-tc), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui,
+    sans-serif;
 }

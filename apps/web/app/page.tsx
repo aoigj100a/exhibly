@@ -25,7 +25,9 @@ export default async function Home() {
     // 留白靠首屏標題的字級對比撐開，網格本身維持緊湊，避免顯得像沒做完。
     <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
       <header className="mb-10 text-center sm:mb-14">
-        <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
+        {/* 純西文品牌字才用 font-display（Space Grotesk）；
+            它沒有中文字符，不能套到其他中文標題上 */}
+        <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
           Exhibly
         </h1>
         <p className="mt-3 text-sm text-muted-foreground sm:text-base">
@@ -78,10 +80,12 @@ export default async function Home() {
         </section>
       )}
 
+      {/* 全站唯一的關鍵 CTA，套品牌橙；hover 加深不是換色，維持橙作為
+          點綴、不喧賓奪主的份量。 */}
       <div className="mt-8 text-center sm:mt-10">
         <Link
           href="/list"
-          className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          className="text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80"
         >
           看全部展覽
         </Link>

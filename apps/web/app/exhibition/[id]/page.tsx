@@ -76,7 +76,18 @@ export default async function ExhibitionDetail({
           <>
             <dt className="text-sm font-medium text-muted-foreground">票價</dt>
             <dd>
-              <Badge variant={exhibition.isFree ? "default" : "outline"}>
+              {/* 淡彩（tonal）風格：bg-primary/10 淡橘底 + 深字，對比 ~13:1，
+                  遠高於實心橘底配深字的 5.1:1，跟旁邊的淡莫蘭迪標籤調性一致。
+                  variant 用 outline 當底，不用 default（不然要跟它自帶的
+                  bg-primary/text-primary-foreground 打架）。 */}
+              <Badge
+                variant="outline"
+                className={
+                  exhibition.isFree
+                    ? "border-transparent bg-primary/10 text-sm font-semibold text-gray-800"
+                    : "text-sm font-semibold"
+                }
+              >
                 {exhibition.isFree ? "免費" : "收費"}
               </Badge>
             </dd>
