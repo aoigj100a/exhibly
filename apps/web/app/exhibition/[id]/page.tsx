@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@exhibly/db";
+import { getExhibitionById } from "@exhibly/db";
 import { Badge } from "@exhibly/ui/components/badge";
 import ExhibitionImage from "../../components/ExhibitionImage";
 import { tagToHsl } from "@/lib/tagColor";
@@ -21,14 +21,7 @@ export default async function ExhibitionDetail({
 }) {
   const { id } = await params;
 
-  const exhibition = await prisma.exhibition.findUnique({
-    where: { id },
-    include: {
-      tags: {                   // 第一段：展覽 → ExhibitionTag（撈出所有連線）
-        include: { tag: true }, // 第二段：每條線 → 它連到的 Tag（撈出標籤本身）
-      },
-    },
-  });
+  const exhibition = await getExhibitionById(id);
 
   if (!exhibition) {
     notFound();

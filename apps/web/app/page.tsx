@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@exhibly/db";
+import { getRecentExhibitions } from "@exhibly/db";
 import { tagToHsl } from "@/lib/tagColor";
 import ExhibitionCard from "./components/ExhibitionCard";
 
@@ -14,11 +14,7 @@ const featured = ["動漫", "療癒", "原住民文化", "當代藝術", "沉浸
 export default async function Home() {
   // 近期展覽：依展期排序撈最近的幾筆真實資料，填補主題入口下方的空白，
   // 用跟列表頁同一顆 ExhibitionCard，不要另外刻一種卡片長相。
-  const recentExhibitions = await prisma.exhibition.findMany({
-    orderBy: { startDate: "asc" },
-    take: 6,
-    include: { tags: { include: { tag: true } } },
-  });
+  const recentExhibitions = await getRecentExhibitions();
 
   return (
     // 內容量小（僅 11 筆展覽、6 個精選主題），刻意不用大留白撐場——

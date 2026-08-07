@@ -1,4 +1,4 @@
-import { prisma } from "@exhibly/db";
+import { getAllTags, getExhibitions } from "@exhibly/db";
 import ExhibitionCard from "../components/ExhibitionCard";
 import TagFilter from "../components/TagFilter";
 
@@ -10,16 +10,9 @@ export default async function ListPage({
   const { tags } = await searchParams;
   const selectedTags = tags ? tags.split(",") : [];
 
-  const allTags = await prisma.tag.findMany();
+  const allTags = await getAllTags();
 
-  // 這句是 M2 早就寫通的多對多篩選 query，篩選條件原封不動，
-  // 這次補上 include 是為了讓沒圖的展覽能拿標籤畫展牌。
-  const exhibitions = await prisma.exhibition.findMany({
-    where: selectedTags.length
-      ? { tags: { some: { tag: { name: { in: selectedTags } } } } }
-      : undefined,
-    include: { tags: { include: { tag: true } } },
-  });
+  const exhibitions = await getExhibitions(selectedTags);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 sm:px-8 sm:py-16 lg:px-12">
