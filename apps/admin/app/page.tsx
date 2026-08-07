@@ -1,5 +1,6 @@
 import { getExhibitions } from "@exhibly/db";
 import { Button } from "@exhibly/ui/components/button";
+import { deleteExhibition } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -41,11 +42,15 @@ export default async function AdminHome() {
               <div className="w-56 shrink-0 whitespace-nowrap text-sm text-muted-foreground">
                 {dateFmt.format(e.startDate)} – {dateFmt.format(e.endDate)}
               </div>
-              {/* 操作區版位先留著，下一步在這裡掛刪除鈕 */}
+              {/* 純伺服器寫法：form 直接指向 server action，hidden input 帶 id。
+                  之後要加 confirm 再抽成獨立 component 包這個 form。 */}
               <div className="w-24 shrink-0 text-right">
-                <Button variant="outline" size="sm" disabled>
-                  刪除
-                </Button>
+                <form action={deleteExhibition}>
+                  <input type="hidden" name="id" value={e.id} />
+                  <Button type="submit" variant="outline" size="sm">
+                    刪除
+                  </Button>
+                </form>
               </div>
             </div>
           ))}
