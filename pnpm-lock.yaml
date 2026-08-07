@@ -20,6 +20,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@exhibly/db':
+        specifier: workspace:^
+        version: link:../../packages/db
       '@exhibly/ui':
         specifier: workspace:*
         version: link:../../packages/ui

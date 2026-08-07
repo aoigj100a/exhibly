@@ -11,6 +11,7 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@exhibly/db": "workspace:^",
     "@exhibly/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "next": "16.2.0",
