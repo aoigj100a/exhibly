@@ -20,6 +20,8 @@ model Exhibition {
   ticketUrl   String?
   imageUrl    String?
   isFree      Boolean? // true=免費/false=收費/null=未知
+  price       String? // 票價說明，格式不固定（例：「全票 380｜優待票 350」），不拆結構化
+  openingHours String? // 每日開放時段，格式不固定（例：「週二至週日 10:00–18:00，週一休館」），不拆結構化
 
   tags        ExhibitionTag[]
 

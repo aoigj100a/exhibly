@@ -97,6 +97,8 @@ const exhibitions = [
     ticketUrl: null,
     imageUrl: "https://event.moc.gov.tw/Public/Data/64111559371.jpg",
     isFree: false,
+    price: "全票 249｜優惠票 179",
+    openingHours: "週二至週日 09:00–17:00，週一休館",
     description:
       "以花的隱喻為引，呈現日本戰後至當代藝術的精神風貌。集結十六位日本藝術大師，包含井上有一、草間彌生、荒木經惟、奈良美智、村上隆、鹽田千春、名和晃平等，作品橫跨書道、繪畫、攝影、雕塑、裝置與流行視覺等領域。全票 249 元、優惠票 179 元。",
     tagNames: ["日本當代藝術", "當代藝術", "攝影", "雕塑", "絢爛", "好拍", "震撼"],
@@ -126,6 +128,8 @@ const exhibitions = [
     imageUrl:
       "https://imgs2.utiki.com.tw/Data/UTIKI_UDN//Images/UTK2431/P19BAHLP/202605120250574934%E5%94%AE%E7%A5%A8%E7%B6%B2_1920x1080_300K.jpg",
     isFree: false,
+    price: "全票 480｜優待票 430",
+    openingHours: "每日 10:00–18:00（17:30停止售票及入場）",
     description:
       "慶祝《櫻桃小丸子》原作誕生40週年，以原作為核心，串聯從漫畫誕生到動畫化的經典歷程。結合漫畫複製原稿展示、沉浸式光影體驗與互動拍照場景，共11個展區。現場設有限定商店販售40週年紀念商品。開放時間：每日10:00-18:00（17:30停止售票及入場）。",
     tagNames: ["動漫", "療癒", "懷舊", "好拍", "沉浸式"],
@@ -141,6 +145,8 @@ const exhibitions = [
     imageUrl:
       "https://imgs2.utiki.com.tw/Data/UTIKI_UDN//Images/UTK2431/P18UR3V5/202606120453386936BTR_%E5%94%AE%E7%A5%A8%E7%B6%B2_1920x1080.jpg",
     isFree: false,
+    price: "全票 380｜優待票 340",
+    openingHours: "每日 10:00–18:00（17:30停止售票入場）",
     description:
       "哥倫比亞藝術大師費爾南多・波特羅（Fernando Botero）首度來台大型個展。以飽滿筆觸與誇大體積比例聞名，人物、動物與水果皆呈現圓滾滾姿態，形成獨樹一幟的「膨脹美學」。展出油畫、素描、水彩與立體雕塑共118件作品。營業時間：每日10:00-18:00（17:30停止售票入場）。",
     tagNames: ["當代藝術", "繪畫", "雕塑", "拉丁美洲藝術", "療癒", "好拍"],
