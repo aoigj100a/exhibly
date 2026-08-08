@@ -170,5 +170,5 @@ export async function updateExhibitionTags(
 
   revalidatePath("/");
   revalidatePath(`/${exhibitionId}/tags`);
-  redirect(`/${exhibitionId}/tags`);
+  redirect("/");
 }
