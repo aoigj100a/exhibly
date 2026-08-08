@@ -2,9 +2,13 @@
 
 import { useActionState } from "react";
 import { Button } from "@exhibly/ui/components/button";
-import { createExhibition, type CreateExhibitionState } from "../actions";
+import {
+  createExhibition,
+  type CreateExhibitionWithTagsState,
+} from "../actions";
+import TagCheckboxGroups from "../components/TagCheckboxGroups";
 
-const initialState: CreateExhibitionState = {
+const initialState: CreateExhibitionWithTagsState = {
   errors: {},
   values: {
     name: "",
@@ -20,6 +24,7 @@ const initialState: CreateExhibitionState = {
     price: "",
     openingHours: "",
   },
+  tagIds: [],
 };
 
 const inputClassName =
@@ -30,7 +35,11 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs text-destructive">{message}</p>;
 }
 
-export default function NewExhibitionForm() {
+export default function NewExhibitionForm({
+  tags,
+}: {
+  tags: { id: string; name: string; category: string }[];
+}) {
   const [state, formAction] = useActionState(createExhibition, initialState);
 
   return (
@@ -197,6 +206,11 @@ export default function NewExhibitionForm() {
           className={inputClassName}
         />
       </div>
+
+      <TagCheckboxGroups
+        tags={tags}
+        selectedTagIds={new Set(state.tagIds)}
+      />
 
       <Button type="submit">送出</Button>
     </form>

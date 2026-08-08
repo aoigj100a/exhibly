@@ -27,6 +27,18 @@ export type CreateExhibitionState = {
   values: Record<ExhibitionField, string>;
 };
 
+// 只有新增表單同時收標籤，updateExhibition／編輯表單不需要 tagIds，
+// 所以另外疊一個型別，不動 CreateExhibitionState 原本的形狀。
+export type CreateExhibitionWithTagsState = CreateExhibitionState & {
+  tagIds: string[];
+};
+
+function readTagIds(formData: FormData): string[] {
+  return formData
+    .getAll("tagIds")
+    .filter((value): value is string => typeof value === "string");
+}
+
 function readValues(formData: FormData): Record<ExhibitionField, string> {
   const values = {} as Record<ExhibitionField, string>;
   for (const field of EXHIBITION_FIELDS) {
@@ -44,10 +56,11 @@ function optionalString(value: string): string | null {
 }
 
 export async function createExhibition(
-  _prevState: CreateExhibitionState,
+  _prevState: CreateExhibitionWithTagsState,
   formData: FormData
-): Promise<CreateExhibitionState> {
+): Promise<CreateExhibitionWithTagsState> {
   const values = readValues(formData);
+  const tagIds = readTagIds(formData);
   const errors: Partial<Record<ExhibitionField, string>> = {};
 
   if (values.name.trim() === "") {
@@ -60,13 +73,18 @@ export async function createExhibition(
   // 驗證一定要在這裡（server action）做：HTML required 只擋得住瀏覽器，
   // 繞過表單直接送 request 就沒有防護，最終還是要以這裡為準。
   if (Object.keys(errors).length > 0) {
-    return { errors, values };
+    return { errors, values, tagIds };
   }
 
   const endDate = optionalString(values.endDate);
   const isFree =
     values.isFree === "true" ? true : values.isFree === "false" ? false : null;
 
+  // 用巢狀寫入（而不是 $transaction([create, createMany])）：Prisma 對
+  // 巢狀寫入本來就會包成單一交易送出，效果一樣但不用手動組兩個查詢、
+  // 也不用先拿到 exhibition.id 才能組第二個查詢。跟 seed.ts 建關聯的
+  // 寫法一致。展覽建好、標籤關聯建立失敗都會整個回滾，不會留下一筆
+  // 沒有標籤的展覽。
   await prisma.exhibition.create({
     data: {
       name: values.name.trim(),
@@ -81,6 +99,9 @@ export async function createExhibition(
       isFree,
       price: optionalString(values.price),
       openingHours: optionalString(values.openingHours),
+      tags: {
+        create: tagIds.map((tagId) => ({ tag: { connect: { id: tagId } } })),
+      },
     },
   });
 
@@ -157,9 +178,7 @@ export async function updateExhibitionTags(
   exhibitionId: string,
   formData: FormData
 ) {
-  const tagIds = formData
-    .getAll("tagIds")
-    .filter((value): value is string => typeof value === "string");
+  const tagIds = readTagIds(formData);
 
   await prisma.$transaction([
     prisma.exhibitionTag.deleteMany({ where: { exhibitionId } }),

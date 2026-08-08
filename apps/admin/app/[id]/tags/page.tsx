@@ -3,11 +3,7 @@ import Link from "next/link";
 import { getAllTags, getExhibitionById } from "@exhibly/db";
 import { Button } from "@exhibly/ui/components/button";
 import { updateExhibitionTags } from "../../actions";
-
-const CATEGORY_LABEL: Record<string, string> = {
-  SUBJECT: "題材",
-  MOOD: "氛圍",
-};
+import TagCheckboxGroups from "../../components/TagCheckboxGroups";
 
 export default async function ExhibitionTagsPage({
   params,
@@ -27,14 +23,6 @@ export default async function ExhibitionTagsPage({
 
   const selectedTagIds = new Set(exhibition.tags.map((et) => et.tagId));
 
-  // 依 category 分組顯示，不要 28 個標籤混在一起
-  const groups = new Map<string, typeof allTags>();
-  for (const tag of allTags) {
-    const group = groups.get(tag.category) ?? [];
-    group.push(tag);
-    groups.set(tag.category, group);
-  }
-
   const updateTagsForExhibition = updateExhibitionTags.bind(null, id);
 
   return (
@@ -53,29 +41,7 @@ export default async function ExhibitionTagsPage({
       </header>
 
       <form action={updateTagsForExhibition} className="space-y-8">
-        {[...groups.entries()].map(([category, tags]) => (
-          <fieldset key={category} className="space-y-3">
-            <legend className="text-sm font-medium">
-              {CATEGORY_LABEL[category] ?? category}
-            </legend>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {tags.map((tag) => (
-                <label
-                  key={tag.id}
-                  className="flex items-center gap-1.5 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    name="tagIds"
-                    value={tag.id}
-                    defaultChecked={selectedTagIds.has(tag.id)}
-                  />
-                  {tag.name}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        ))}
+        <TagCheckboxGroups tags={allTags} selectedTagIds={selectedTagIds} />
 
         <Button type="submit">儲存</Button>
       </form>
