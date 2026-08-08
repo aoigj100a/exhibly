@@ -46,7 +46,8 @@ export default async function AdminHome() {
                 {e.name}
               </div>
               <div className="w-56 shrink-0 whitespace-nowrap text-sm text-muted-foreground">
-                {dateFmt.format(e.startDate)} – {dateFmt.format(e.endDate)}
+                {dateFmt.format(e.startDate)}
+                {e.endDate ? ` – ${dateFmt.format(e.endDate)}` : " 起"}
               </div>
               <div className="w-24 shrink-0 text-right">
                 <DeleteButton id={e.id} name={e.name} />

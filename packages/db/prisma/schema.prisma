@@ -12,7 +12,7 @@ model Exhibition {
   id          String   @id @default(cuid())
   name        String
   startDate   DateTime
-  endDate     DateTime
+  endDate     DateTime? // 常設展/長期展沒有明確結束日期，可空
   description String?
   city        String?
   venue       String?

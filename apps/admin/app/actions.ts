@@ -4,9 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@exhibly/db";
 
-// 最小可寫入版本：只收 name、startDate。endDate 在 schema 是必填，
-// 這步還沒有第二個日期欄位，先填成跟 startDate 同一天卡住鏈路，
-// 之後補完整表單時再讓使用者自己選 endDate。
+// 最小可寫入版本：只收 name、startDate。endDate 現在是選填，
+// 不填就是 null（常設展、長期展沒有明確結束日期）。
 export async function createExhibition(formData: FormData) {
   const name = formData.get("name");
   const startDate = formData.get("startDate");
@@ -18,7 +17,6 @@ export async function createExhibition(formData: FormData) {
     data: {
       name,
       startDate: new Date(startDate),
-      endDate: new Date(startDate),
     },
   });
 

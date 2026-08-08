@@ -30,9 +30,9 @@ export default async function ExhibitionDetail({
   // 場館 / 城市可能為 null，過濾掉再用「・」串起來，避免出現「・台北」這種開頭
   const place = [exhibition.venue, exhibition.city].filter(Boolean).join("・");
 
-  const dateRange = `${dateFmt.format(exhibition.startDate)} – ${dateFmt.format(
-    exhibition.endDate
-  )}`;
+  const dateRange = exhibition.endDate
+    ? `${dateFmt.format(exhibition.startDate)} – ${dateFmt.format(exhibition.endDate)}`
+    : `${dateFmt.format(exhibition.startDate)} 起`;
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
@@ -53,7 +53,8 @@ export default async function ExhibitionDetail({
       {/* 資訊區：label/value 兩欄網格，手機收成上下堆疊。呼應美術館展牌
           說明卡（標題／媒材／年代並列）的排版邏輯，缺值的欄位直接不渲染那一列。 */}
       <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-border pt-8 sm:mt-10 sm:grid-cols-[120px_1fr] sm:gap-y-6 sm:pt-10">
-        {/* 日期一定有值（schema 為必填），直接顯示 */}
+        {/* startDate 一定有值直接顯示；endDate 可能是 null（常設展），
+            這組 dt/dd 固定渲染，只是文案跟著 dateRange 換 */}
         <dt className="text-sm font-medium text-muted-foreground">展期</dt>
         <dd className="text-sm">{dateRange}</dd>
 
