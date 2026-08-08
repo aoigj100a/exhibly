@@ -88,6 +88,54 @@ export async function createExhibition(
   redirect("/");
 }
 
+// 驗證規則與 createExhibition 一致，特意不合併成同一個函式：這個要接
+// prisma.exhibition.update，createExhibition 接的是 create，硬抽共用
+// 現在言之過早，等表單元件那邊決定怎麼共用後再一併處理。
+export async function updateExhibition(
+  id: string,
+  _prevState: CreateExhibitionState,
+  formData: FormData
+): Promise<CreateExhibitionState> {
+  const values = readValues(formData);
+  const errors: Partial<Record<ExhibitionField, string>> = {};
+
+  if (values.name.trim() === "") {
+    errors.name = "請輸入展覽名稱";
+  }
+  if (values.startDate.trim() === "") {
+    errors.startDate = "請選擇開始日期";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { errors, values };
+  }
+
+  const endDate = optionalString(values.endDate);
+  const isFree =
+    values.isFree === "true" ? true : values.isFree === "false" ? false : null;
+
+  await prisma.exhibition.update({
+    where: { id },
+    data: {
+      name: values.name.trim(),
+      startDate: new Date(values.startDate),
+      endDate: endDate ? new Date(endDate) : null,
+      description: optionalString(values.description),
+      city: optionalString(values.city),
+      venue: optionalString(values.venue),
+      location: optionalString(values.location),
+      ticketUrl: optionalString(values.ticketUrl),
+      imageUrl: optionalString(values.imageUrl),
+      isFree,
+      price: optionalString(values.price),
+      openingHours: optionalString(values.openingHours),
+    },
+  });
+
+  revalidatePath("/");
+  redirect("/");
+}
+
 // ExhibitionTag 對 Exhibition 的關聯是 onDelete: Cascade（見 schema），
 // 刪展覽時資料庫會自動一併清掉關聯列，這裡不用手動先刪 ExhibitionTag。
 export async function deleteExhibition(formData: FormData) {
