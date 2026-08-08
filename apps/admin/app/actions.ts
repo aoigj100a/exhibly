@@ -4,19 +4,83 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@exhibly/db";
 
-// 最小可寫入版本：只收 name、startDate。endDate 現在是選填，
-// 不填就是 null（常設展、長期展沒有明確結束日期）。
-export async function createExhibition(formData: FormData) {
-  const name = formData.get("name");
-  const startDate = formData.get("startDate");
-  if (typeof name !== "string" || typeof startDate !== "string") {
-    throw new Error("缺少 name 或 startDate");
+// 表單欄位清單，統一從這裡引用，讀值、回填、型別都靠它保持一致。
+const EXHIBITION_FIELDS = [
+  "name",
+  "startDate",
+  "endDate",
+  "description",
+  "city",
+  "venue",
+  "location",
+  "ticketUrl",
+  "imageUrl",
+  "isFree",
+  "price",
+  "openingHours",
+] as const;
+
+type ExhibitionField = (typeof EXHIBITION_FIELDS)[number];
+
+export type CreateExhibitionState = {
+  errors: Partial<Record<ExhibitionField, string>>;
+  values: Record<ExhibitionField, string>;
+};
+
+function readValues(formData: FormData): Record<ExhibitionField, string> {
+  const values = {} as Record<ExhibitionField, string>;
+  for (const field of EXHIBITION_FIELDS) {
+    const raw = formData.get(field);
+    values[field] = typeof raw === "string" ? raw : "";
   }
+  return values;
+}
+
+// 可空欄位共用的轉換：空字串（含只有空白）一律當成沒填，存 null，
+// 不要把 "" 寫進資料庫跟「未知」混在一起。
+function optionalString(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
+export async function createExhibition(
+  _prevState: CreateExhibitionState,
+  formData: FormData
+): Promise<CreateExhibitionState> {
+  const values = readValues(formData);
+  const errors: Partial<Record<ExhibitionField, string>> = {};
+
+  if (values.name.trim() === "") {
+    errors.name = "請輸入展覽名稱";
+  }
+  if (values.startDate.trim() === "") {
+    errors.startDate = "請選擇開始日期";
+  }
+
+  // 驗證一定要在這裡（server action）做：HTML required 只擋得住瀏覽器，
+  // 繞過表單直接送 request 就沒有防護，最終還是要以這裡為準。
+  if (Object.keys(errors).length > 0) {
+    return { errors, values };
+  }
+
+  const endDate = optionalString(values.endDate);
+  const isFree =
+    values.isFree === "true" ? true : values.isFree === "false" ? false : null;
 
   await prisma.exhibition.create({
     data: {
-      name,
-      startDate: new Date(startDate),
+      name: values.name.trim(),
+      startDate: new Date(values.startDate),
+      endDate: endDate ? new Date(endDate) : null,
+      description: optionalString(values.description),
+      city: optionalString(values.city),
+      venue: optionalString(values.venue),
+      location: optionalString(values.location),
+      ticketUrl: optionalString(values.ticketUrl),
+      imageUrl: optionalString(values.imageUrl),
+      isFree,
+      price: optionalString(values.price),
+      openingHours: optionalString(values.openingHours),
     },
   });
 
