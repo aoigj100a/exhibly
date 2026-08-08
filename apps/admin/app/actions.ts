@@ -99,3 +99,28 @@ export async function deleteExhibition(formData: FormData) {
   await prisma.exhibition.delete({ where: { id } });
   revalidatePath("/");
 }
+
+// 全刪重建：ExhibitionTag 除了兩個外鍵沒有其他欄位，重建不會遺失資訊。
+// 刪除與新增包在同一筆交易裡，避免刪完後新增失敗、展覽變成沒有任何標籤。
+// 前提：ExhibitionTag 不能有自身欄位。日後若加上 createdAt、order、
+// isPrimary 之類的欄位，這裡就不能再整批砍掉重建（會把那些資料一起
+// 洗掉），必須改成算差集（比對現有/送出的 tagId，只刪少的、只加多的）。
+export async function updateExhibitionTags(
+  exhibitionId: string,
+  formData: FormData
+) {
+  const tagIds = formData
+    .getAll("tagIds")
+    .filter((value): value is string => typeof value === "string");
+
+  await prisma.$transaction([
+    prisma.exhibitionTag.deleteMany({ where: { exhibitionId } }),
+    prisma.exhibitionTag.createMany({
+      data: tagIds.map((tagId) => ({ exhibitionId, tagId })),
+    }),
+  ]);
+
+  revalidatePath("/");
+  revalidatePath(`/${exhibitionId}/tags`);
+  redirect(`/${exhibitionId}/tags`);
+}

@@ -37,7 +37,7 @@ export default async function AdminHome() {
         <div className="flex items-center gap-4 border-b border-border px-4 py-3 text-sm font-medium text-muted-foreground">
           <div className="min-w-0 flex-1">展覽名稱</div>
           <div className="w-56 shrink-0">日期</div>
-          <div className="w-24 shrink-0 text-right">操作</div>
+          <div className="w-40 shrink-0 text-right">操作</div>
         </div>
         <div className="divide-y divide-border">
           {exhibitions.map((e) => (
@@ -49,7 +49,10 @@ export default async function AdminHome() {
                 {dateFmt.format(e.startDate)}
                 {e.endDate ? ` – ${dateFmt.format(e.endDate)}` : " 起"}
               </div>
-              <div className="w-24 shrink-0 text-right">
+              <div className="flex w-40 shrink-0 items-center justify-end gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/${e.id}/tags`}>標籤</Link>
+                </Button>
                 <DeleteButton id={e.id} name={e.name} />
               </div>
             </div>
