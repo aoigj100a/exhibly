@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { getExhibitions } from "@exhibly/db";
+import { Button } from "@exhibly/ui/components/button";
 import DeleteButton from "./components/DeleteButton";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +19,16 @@ export default async function AdminHome() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12 sm:px-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Exhibly Admin</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          共 {exhibitions.length} 筆展覽
-        </p>
+      <header className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Exhibly Admin</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            共 {exhibitions.length} 筆展覽
+          </p>
+        </div>
+        <Button asChild size="sm">
+          <Link href="/new">新增展覽</Link>
+        </Button>
       </header>
 
       {/* 資料列，不是卡片牆：每筆一橫列，靠 divide-y 拉出列與列的分隔線，
