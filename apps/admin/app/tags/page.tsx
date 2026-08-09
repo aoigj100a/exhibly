@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getTagsWithExhibitionCount } from "@exhibly/db";
+import { Button } from "@exhibly/ui/components/button";
+import { toggleTagListed } from "../actions";
 import NewTagForm from "./NewTagForm";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +25,7 @@ export default async function TagsPage() {
         </Link>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">標籤管理</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          共 {tags.length} 個標籤，依展覽數多到少排序。可以新增標籤，開關／改名／刪除都還沒做。
+          共 {tags.length} 個標籤，依展覽數多到少排序。可以新增標籤，在網站篩選標籤列中顯示與隱藏標籤，改名／刪除都還沒做。
         </p>
       </header>
 
@@ -40,6 +42,7 @@ export default async function TagsPage() {
           <div className="w-20 shrink-0">分類</div>
           <div className="w-24 shrink-0">選單狀態</div>
           <div className="w-20 shrink-0 text-right">展覽數</div>
+          <div className="w-16 shrink-0 text-right">操作</div>
         </div>
         <div className="divide-y divide-border">
           {tags.map((tag) => (
@@ -55,6 +58,22 @@ export default async function TagsPage() {
               </div>
               <div className="w-20 shrink-0 text-right text-sm text-muted-foreground">
                 {tag._count.exhibitions}
+              </div>
+              <div className="w-16 shrink-0 text-right">
+                <form action={toggleTagListed}>
+                  <input type="hidden" name="tagId" value={tag.id} />
+                  <input
+                    type="hidden"
+                    name="nextIsListed"
+                    value={(!tag.isListed).toString()}
+                  />
+                  {/* 按鈕文字是「接下來要做的動作」，不是目前狀態——
+                      isListed=true 時按鈕要說「隱藏」（會把它關掉），
+                      不是複述「顯示中」，不然使用者會分不清楚點下去會發生什麼。 */}
+                  <Button type="submit" variant="outline" size="sm">
+                    {tag.isListed ? "隱藏" : "顯示"}
+                  </Button>
+                </form>
               </div>
             </div>
           ))}

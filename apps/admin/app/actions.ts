@@ -209,6 +209,25 @@ export async function createTag(
   redirect("/tags");
 }
 
+// isListed 只控制篩選頁選單要不要顯示這個標籤，跟這個標籤能不能用
+// 是兩件事（詳見 schema 裡 Tag.isListed 的註解）。這裡只切開關，
+// 不動 name／category，改名跟刪除都還沒做。
+export async function toggleTagListed(formData: FormData) {
+  const tagId = formData.get("tagId");
+  const nextIsListed = formData.get("nextIsListed");
+
+  if (typeof tagId !== "string" || !tagId) {
+    throw new Error("缺少標籤 id");
+  }
+
+  await prisma.tag.update({
+    where: { id: tagId },
+    data: { isListed: nextIsListed === "true" },
+  });
+
+  revalidatePath("/tags");
+}
+
 // ExhibitionTag 對 Exhibition 的關聯是 onDelete: Cascade（見 schema），
 // 刪展覽時資料庫會自動一併清掉關聯列，這裡不用手動先刪 ExhibitionTag。
 export async function deleteExhibition(formData: FormData) {

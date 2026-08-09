@@ -1,4 +1,4 @@
-import { getAllTags, getExhibitions } from "@exhibly/db";
+import { getListedTags, getExhibitions } from "@exhibly/db";
 import ExhibitionCard from "../components/ExhibitionCard";
 import TagFilter from "../components/TagFilter";
 
@@ -10,7 +10,7 @@ export default async function ListPage({
   const { tags } = await searchParams;
   const selectedTags = tags ? tags.split(",") : [];
 
-  const allTags = await getAllTags();
+  const allTags = await getListedTags();
 
   const exhibitions = await getExhibitions(selectedTags);
 
