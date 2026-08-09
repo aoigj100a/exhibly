@@ -9,7 +9,7 @@ import ExhibitionCard from "./components/ExhibitionCard";
 export const dynamic = "force-dynamic";
 
 // 精選主題：目前寫死，之後要動態化（例如撈出展覽數最多的標籤）再改成從 db 撈。
-const featured = ["動漫", "療癒", "原住民文化", "當代藝術", "沉浸式", "好拍"];
+const featured = ["動漫", "懷舊", "原住民文化", "當代藝術", "沉浸式", "好拍"];
 
 export default async function Home() {
   // 近期展覽：依展期排序撈最近的幾筆真實資料，填補主題入口下方的空白，
