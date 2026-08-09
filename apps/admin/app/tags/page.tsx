@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTagsWithExhibitionCount } from "@exhibly/db";
+import NewTagForm from "./NewTagForm";
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +23,13 @@ export default async function TagsPage() {
         </Link>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">標籤管理</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          共 {tags.length} 個標籤，依展覽數多到少排序。這頁只能看，新增／開關／改名／刪除都還沒做。
+          共 {tags.length} 個標籤，依展覽數多到少排序。可以新增標籤，開關／改名／刪除都還沒做。
         </p>
       </header>
+
+      <div className="mb-8">
+        <NewTagForm />
+      </div>
 
       {/* 單一表格不分區塊：展覽數是這頁的主要排序依據，題材跟氛圍混排
           才看得出「哪個標籤整體用最多」，分類只當一欄輔助資訊即可，

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@exhibly/db";
+import { prisma, Prisma } from "@exhibly/db";
 
 // 表單欄位清單，統一從這裡引用，讀值、回填、型別都靠它保持一致。
 const EXHIBITION_FIELDS = [
@@ -155,6 +155,58 @@ export async function updateExhibition(
 
   revalidatePath("/");
   redirect("/");
+}
+
+const TAG_CATEGORY_VALUES = ["SUBJECT", "MOOD"] as const;
+
+export type CreateTagState = {
+  errors: Partial<Record<"name" | "category", string>>;
+  values: { name: string; category: string };
+};
+
+// isListed 不放表單，靠 schema 的 @default(true)：這支 action 只負責
+// 建標籤，開關／改名／刪除是另外的事，不在這裡做。
+export async function createTag(
+  _prevState: CreateTagState,
+  formData: FormData
+): Promise<CreateTagState> {
+  const name = String(formData.get("name") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const values = { name, category };
+  const errors: Partial<Record<"name" | "category", string>> = {};
+
+  if (name === "") {
+    errors.name = "請輸入標籤名稱";
+  }
+  if (
+    !TAG_CATEGORY_VALUES.includes(category as (typeof TAG_CATEGORY_VALUES)[number])
+  ) {
+    errors.category = "請選擇分類";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { errors, values };
+  }
+
+  try {
+    await prisma.tag.create({ data: { name, category } });
+  } catch (error) {
+    // name 是 unique，重複時 Prisma 丟 P2002——在這裡接住轉成看得懂的
+    // 訊息，不要讓原始錯誤直接噴到畫面上。
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return {
+        errors: { name: `標籤「${name}」已存在` },
+        values,
+      };
+    }
+    throw error;
+  }
+
+  revalidatePath("/tags");
+  redirect("/tags");
 }
 
 // ExhibitionTag 對 Exhibition 的關聯是 onDelete: Cascade（見 schema），

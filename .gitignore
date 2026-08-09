@@ -39,3 +39,6 @@ yarn-error.log*
 
 # Prisma dump
 dump.json
+
+.playwright-mcp
+.claude/settings.local.json
