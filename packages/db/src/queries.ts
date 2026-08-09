@@ -34,3 +34,13 @@ export function getRecentExhibitions() {
 export function getAllTags() {
   return prisma.tag.findMany();
 }
+
+// 給 admin 標籤管理頁用：刻意不加 where 篩 isListed，管理頁必須看得到
+// 全部標籤（含關掉的），不然標籤一旦被關掉、選單挑不到，就再也開不回來。
+// 排序依展覽數多到少；同數量時退回 name asc，避免同分排序在每次查詢間飄動。
+export function getTagsWithExhibitionCount() {
+  return prisma.tag.findMany({
+    include: { _count: { select: { exhibitions: true } } },
+    orderBy: [{ exhibitions: { _count: "desc" } }, { name: "asc" }],
+  });
+}

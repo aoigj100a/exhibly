@@ -26,9 +26,14 @@ export default async function AdminHome() {
             共 {exhibitions.length} 筆展覽
           </p>
         </div>
-        <Button asChild size="sm">
-          <Link href="/new">新增展覽</Link>
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/tags">標籤管理</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/new">新增展覽</Link>
+          </Button>
+        </div>
       </header>
 
       {/* 資料列，不是卡片牆：每筆一橫列，靠 divide-y 拉出列與列的分隔線，
