@@ -34,6 +34,11 @@ model Tag {
   id          String   @id @default(cuid())
   name        String   @unique
   category    String   // "SUBJECT" 或 "MOOD"（SQLite 不支援 enum，M6 換 PostgreSQL 時升級）
+  // 只控制「是否出現在選單」，不是這個標籤能不能用——關掉之後
+  // 仍可貼在展覽上、仍可被 ?tags= 直達篩到、詳情頁 Badge 照常顯示。
+  // 故意不叫 isVisible：那個字暗示標籤到處都看不見，但它其實到處
+  // 都還看得見，只是選單挑不到，取錯名字會騙未來看這欄位的人。
+  isListed    Boolean  @default(true)
 
   exhibitions ExhibitionTag[]
 
