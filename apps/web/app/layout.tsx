@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC, Space_Grotesk } from "next/font/google";
 import "@exhibly/ui/globals.css";
+import Header from "@/components/Header";
 
 // 全站中文本文與大部分標題用 Noto Sans TC（思源黑體），字重涵蓋
 // 400/500/700/900，對應 codebase 實際用到的 font-medium/semibold/bold。
@@ -37,7 +38,10 @@ export default function RootLayout({
       lang="zh-Hant"
       className={`${notoSansTC.variable} ${spaceGrotesk.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }
