@@ -1,6 +1,6 @@
 import { prisma } from "./index";
 import { taipeiToday } from "./date";
-import type { Prisma } from "../generated/prisma/client";
+import type { Prisma, Exhibition } from "../generated/prisma/client";
 
 // 三個查展覽的函式都要帶標籤，兩層 include 統一從這裡引用，不要各自抄一遍
 export const exhibitionInclude = {
@@ -17,6 +17,9 @@ export interface GetExhibitionsOptions {
 // endDate 可空，null 的語意是「不知道有沒有結束日」而非「已結束」，
 // 所以 current 必須用 OR 把 null 納入，不能直接寫 gte（那樣會漏掉
 // 沒填 endDate、但已經開展的展覽）。
+// ❗ 這份判斷邏輯與 getExhibitionStatus() 是同一套規則的兩種形狀
+// （一個是 Prisma where 條件、一個是 JS 判斷），無法直接共用實作。
+// 改這裡要記得同步改 getExhibitionStatus()，反之亦然。
 function statusWhere(
   status: ExhibitionStatus | undefined,
   today: Date,
@@ -34,6 +37,24 @@ function statusWhere(
     default:
       return undefined;
   }
+}
+
+// 給詳情頁標示用的純函式版本，判斷邏輯必須跟上面的 statusWhere() 完全一致
+// （含 endDate 為 null 視為未知、不算已結束）。改這裡要記得同步改 statusWhere()，
+// 反之亦然——兩邊形狀不同（一個是 JS 判斷、一個是 Prisma where 條件），
+// 沒辦法直接共用實作，這是已知的重複。
+export function getExhibitionStatus(
+  exhibition: Pick<Exhibition, "startDate" | "endDate">,
+): ExhibitionStatus {
+  const today = taipeiToday();
+
+  if (exhibition.startDate > today) {
+    return "upcoming";
+  }
+  if (exhibition.endDate !== null && exhibition.endDate < today) {
+    return "ended";
+  }
+  return "current";
 }
 
 export function getExhibitions(options?: GetExhibitionsOptions) {

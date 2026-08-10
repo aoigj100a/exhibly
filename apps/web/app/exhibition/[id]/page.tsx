@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getExhibitionById } from "@exhibly/db";
+import { getExhibitionById, getExhibitionStatus } from "@exhibly/db";
 import { Badge } from "@exhibly/ui/components/badge";
 import ExhibitionImage from "../../components/ExhibitionImage";
 import { tagToHsl } from "@/lib/tagColor";
@@ -27,6 +27,10 @@ export default async function ExhibitionDetail({
     notFound();
   }
 
+  // 過期展／未開展的頁面照常開得了——不 redirect、不 notFound，
+  // 有人存了書籤、搜尋引擎還索引著，從列表消失不代表從系統消失。
+  const status = getExhibitionStatus(exhibition);
+
   // 場館 / 城市可能為 null，過濾掉再用「・」串起來，避免出現「・台北」這種開頭
   const place = [exhibition.venue, exhibition.city].filter(Boolean).join("・");
 
@@ -45,8 +49,20 @@ export default async function ExhibitionDetail({
         sizes="(min-width: 672px) 672px, 100vw"
       />
 
+      {/* current（現正展出）是預設狀態，標了是噪音，所以不顯示任何東西；
+          ended／upcoming 才提示，樣式克制（純文字、muted 色），不搶展覽名與主視覺 */}
+      {status !== "current" && (
+        <p className="mt-8 text-sm font-medium text-muted-foreground sm:mt-12">
+          {status === "ended" ? "本展已結束" : "即將開展"}
+        </p>
+      )}
+
       {/* 展覽名當大標，是這頁的主角 */}
-      <h1 className="mt-8 text-3xl font-bold tracking-tight sm:mt-12 sm:text-5xl">
+      <h1
+        className={`text-3xl font-bold tracking-tight sm:text-5xl ${
+          status !== "current" ? "mt-2" : "mt-8 sm:mt-12"
+        }`}
+      >
         {exhibition.name}
       </h1>
 
