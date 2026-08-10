@@ -22,14 +22,19 @@ export default function TagFilter({
       : [...selected, name];               // 第一次點 → 加進清單
 
     // 用 URLSearchParams 組網址：它會自動處理中文編碼，跟首頁的 encodeURIComponent 對得起來。
-    // 全空時導回 /list（篩選頁本身），不是 "/"（那是首頁，會把使用者彈走）。
-    if (next.length === 0) {
-      router.push("/list");
-      return;
-    }
+    // ?status= 是獨立的參數，改標籤不能把它洗掉，所以原封不動帶著走；
+    // 全空時退回只剩 ?status=（或完全沒有參數的 /list），不是 "/"（那是首頁，會把使用者彈走）。
     const params = new URLSearchParams();
-    params.set("tags", next.join(","));
-    router.push(`/list?${params.toString()}`);
+    if (next.length > 0) {
+      params.set("tags", next.join(","));
+    }
+    const status = searchParams.get("status");
+    if (status) {
+      params.set("status", status);
+    }
+
+    const query = params.toString();
+    router.push(query ? `/list?${query}` : "/list");
   }
 
   return (
