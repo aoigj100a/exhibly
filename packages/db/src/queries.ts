@@ -1,15 +1,55 @@
 import { prisma } from "./index";
+import { taipeiToday } from "./date";
+import type { Prisma } from "../generated/prisma/client";
 
 // 三個查展覽的函式都要帶標籤，兩層 include 統一從這裡引用，不要各自抄一遍
 export const exhibitionInclude = {
   tags: { include: { tag: true } },
 } as const;
 
-export function getExhibitions(tags?: string[]) {
+export type ExhibitionStatus = "current" | "upcoming" | "ended";
+
+export interface GetExhibitionsOptions {
+  tags?: string[];
+  status?: ExhibitionStatus;
+}
+
+// endDate 可空，null 的語意是「不知道有沒有結束日」而非「已結束」，
+// 所以 current 必須用 OR 把 null 納入，不能直接寫 gte（那樣會漏掉
+// 沒填 endDate、但已經開展的展覽）。
+function statusWhere(
+  status: ExhibitionStatus | undefined,
+  today: Date,
+): Prisma.ExhibitionWhereInput | undefined {
+  switch (status) {
+    case "upcoming":
+      return { startDate: { gt: today } };
+    case "ended":
+      return { endDate: { not: null, lt: today } };
+    case "current":
+      return {
+        startDate: { lte: today },
+        OR: [{ endDate: null }, { endDate: { gte: today } }],
+      };
+    default:
+      return undefined;
+  }
+}
+
+export function getExhibitions(options?: GetExhibitionsOptions) {
+  const { tags, status } = options ?? {};
+
+  const where: Prisma.ExhibitionWhereInput[] = [];
+  if (tags?.length) {
+    where.push({ tags: { some: { tag: { name: { in: tags } } } } });
+  }
+  const statusCondition = statusWhere(status, taipeiToday());
+  if (statusCondition) {
+    where.push(statusCondition);
+  }
+
   return prisma.exhibition.findMany({
-    where: tags?.length
-      ? { tags: { some: { tag: { name: { in: tags } } } } }
-      : undefined,
+    where: where.length ? { AND: where } : undefined,
     include: exhibitionInclude,
   });
 }

@@ -12,7 +12,7 @@ export default async function ListPage({
 
   const allTags = await getListedTags();
 
-  const exhibitions = await getExhibitions(selectedTags);
+  const exhibitions = await getExhibitions({ tags: selectedTags });
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 sm:px-8 sm:py-16 lg:px-12">
