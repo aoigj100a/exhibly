@@ -12,6 +12,7 @@ export type ExhibitionStatus = "current" | "upcoming" | "ended";
 export interface GetExhibitionsOptions {
   tags?: string[];
   status?: ExhibitionStatus;
+  q?: string;
 }
 
 // endDate 可空，null 的語意是「不知道有沒有結束日」而非「已結束」，
@@ -58,7 +59,7 @@ export function getExhibitionStatus(
 }
 
 export function getExhibitions(options?: GetExhibitionsOptions) {
-  const { tags, status } = options ?? {};
+  const { tags, status, q } = options ?? {};
 
   const where: Prisma.ExhibitionWhereInput[] = [];
   if (tags?.length) {
@@ -67,6 +68,10 @@ export function getExhibitions(options?: GetExhibitionsOptions) {
   const statusCondition = statusWhere(status, taipeiToday());
   if (statusCondition) {
     where.push(statusCondition);
+  }
+  const trimmedQ = q?.trim();
+  if (trimmedQ) {
+    where.push({ name: { contains: trimmedQ, mode: "insensitive" } });
   }
 
   return prisma.exhibition.findMany({
