@@ -127,6 +127,19 @@ export default function EditExhibitionForm({
       </div>
 
       <div className="space-y-1.5">
+        <label htmlFor="officialUrl" className="text-sm font-medium">
+          官方網站
+        </label>
+        <input
+          id="officialUrl"
+          name="officialUrl"
+          type="text"
+          defaultValue={state.values.officialUrl}
+          className={inputClassName}
+        />
+      </div>
+
+      <div className="space-y-1.5">
         <label htmlFor="imageUrl" className="text-sm font-medium">
           圖片網址
         </label>

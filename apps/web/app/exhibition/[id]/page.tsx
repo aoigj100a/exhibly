@@ -82,6 +82,24 @@ export default async function ExhibitionDetail({
           </>
         )}
 
+        {exhibition.officialUrl && (
+          <>
+            <dt className="text-sm font-medium text-muted-foreground">
+              官方網站
+            </dt>
+            <dd className="text-sm">
+              <a
+                href={exhibition.officialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                前往官方網站
+              </a>
+            </dd>
+          </>
+        )}
+
         {exhibition.isFree !== null && (
           <>
             <dt className="text-sm font-medium text-muted-foreground">票價</dt>

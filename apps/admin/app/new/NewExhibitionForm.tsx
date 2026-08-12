@@ -19,6 +19,7 @@ const initialState: CreateExhibitionWithTagsState = {
     venue: "",
     location: "",
     ticketUrl: "",
+    officialUrl: "",
     imageUrl: "",
     isFree: "",
     price: "",
@@ -135,6 +136,19 @@ export default function NewExhibitionForm({
           name="ticketUrl"
           type="text"
           defaultValue={state.values.ticketUrl}
+          className={inputClassName}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="officialUrl" className="text-sm font-medium">
+          官方網站
+        </label>
+        <input
+          id="officialUrl"
+          name="officialUrl"
+          type="text"
+          defaultValue={state.values.officialUrl}
           className={inputClassName}
         />
       </div>

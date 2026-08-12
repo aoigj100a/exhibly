@@ -14,6 +14,7 @@ const EXHIBITION_FIELDS = [
   "venue",
   "location",
   "ticketUrl",
+  "officialUrl",
   "imageUrl",
   "isFree",
   "price",
@@ -53,6 +54,43 @@ function readValues(formData: FormData): Record<ExhibitionField, string> {
 function optionalString(value: string): string | null {
   const trimmed = value.trim();
   return trimmed === "" ? null : trimmed;
+}
+
+// 官方網址正規化：故意寫在這裡（寫入端），不是讀取端。讀取端之後只會
+// 變多（詳情頁、admin 列表、未來的爬蟲），但寫入端目前只有這兩張表單，
+// 在這裡正規化一次，之後所有讀取端都能直接信任這個欄位是完整網址、
+// 不用各自再判斷一次有沒有 protocol。
+// 只靠 <input type="url"> 不夠：那只是瀏覽器端提示，繞過表單直接送
+// request 就沒有防護，一定要在 server action 這層再做一次。
+//
+// 白名單而非黑名單：只明確認得 http/https 兩種 scheme 該怎麼處理，
+// 其他一律拒絕，不是列一份「危險 scheme」清單去擋。曾經的寫法是沒有
+// http(s):// 開頭就一律補上 https://，"javascript:alert(1)" 因此被
+// 補成 "https://javascript:alert(1)"——結果無害只是巧合（補完就不再是
+// 合法的 javascript: URL 了），防禦不能建立在這種巧合上，因為只要
+// 換一種 payload 形狀（例如已經帶 "://" 的變形）就可能繞過去。
+// href 裡的 javascript: 是真的 XSS 破口（詳情頁會把這個值直接放進
+// <a href>），所以規則反過來：先認出「已經是 http(s)://」放行，
+// 再認出「完全沒有 scheme」（裸網域/路徑）才補 https://，除此之外
+// ——只要偵測到任何其他 scheme（javascript:、data:、file:、mailto:…）
+// ——一律存 null，不寫入資料庫，不嘗試修好它。
+function normalizeUrl(value: string): string | null {
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  // RFC 3986 的 scheme 語法：一個字母開頭，後面接字母/數字/+/-/.，
+  // 再接一個冒號。符合這個形狀就代表「有 scheme」，但不是 http/https，
+  // 一律視為不允許（涵蓋 javascript:、data:、file:、mailto: 等）。
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
+    return null;
+  }
+
+  // 走到這裡代表完全沒有 scheme（裸網域或裸路徑），才補上 https://
+  return `https://${trimmed}`;
 }
 
 export async function createExhibition(
@@ -95,6 +133,7 @@ export async function createExhibition(
       venue: optionalString(values.venue),
       location: optionalString(values.location),
       ticketUrl: optionalString(values.ticketUrl),
+      officialUrl: normalizeUrl(values.officialUrl),
       imageUrl: optionalString(values.imageUrl),
       isFree,
       price: optionalString(values.price),
@@ -146,6 +185,7 @@ export async function updateExhibition(
       venue: optionalString(values.venue),
       location: optionalString(values.location),
       ticketUrl: optionalString(values.ticketUrl),
+      officialUrl: normalizeUrl(values.officialUrl),
       imageUrl: optionalString(values.imageUrl),
       isFree,
       price: optionalString(values.price),

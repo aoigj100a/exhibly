@@ -32,6 +32,7 @@ export default async function EditExhibitionPage({
     venue: exhibition.venue ?? "",
     location: exhibition.location ?? "",
     ticketUrl: exhibition.ticketUrl ?? "",
+    officialUrl: exhibition.officialUrl ?? "",
     imageUrl: exhibition.imageUrl ?? "",
     isFree:
       exhibition.isFree === true
