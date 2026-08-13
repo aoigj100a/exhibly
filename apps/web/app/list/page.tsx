@@ -3,6 +3,7 @@ import { getListedTags, getExhibitions } from "@exhibly/db";
 import { Button } from "@exhibly/ui/components/button";
 import ExhibitionCard from "../components/ExhibitionCard";
 import TagFilter from "../components/TagFilter";
+import SearchBox from "../components/SearchBox";
 
 type ExhibitionStatus = "current" | "upcoming" | "ended";
 
@@ -25,14 +26,24 @@ function parseStatus(raw: string | undefined): ExhibitionStatus {
 export default async function ListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tags?: string; status?: string }>;
+  searchParams: Promise<{ tags?: string; status?: string; q?: string }>;
 }) {
-  const { tags, status: rawStatus } = await searchParams;
+  const { tags, status: rawStatus, q: rawQ } = await searchParams;
   const selectedTags = tags ? tags.split(",") : [];
-  const status = parseStatus(rawStatus);
+  const q = rawQ?.trim();
+  const isSearching = !!q;
+
+  // 主動搜尋的意圖比瀏覽明確：使用者打了展覽名就是要找那一檔，用預設的
+  // status="current" 把它濾掉（例如檔期已過）會讓人以為網站沒這筆資料，
+  // 所以搜尋時 status 一律不傳，不套用任何狀態篩選、狀態按鈕整排也不渲染。
+  const status = isSearching ? undefined : parseStatus(rawStatus);
 
   const allTags = await getListedTags();
-  const exhibitions = await getExhibitions({ tags: selectedTags, status });
+  const exhibitions = await getExhibitions({
+    tags: selectedTags,
+    status,
+    q,
+  });
 
   // status 切換要保留現有的 ?tags=（TagFilter 那邊反過來保留 ?status=），
   // 兩個參數各自獨立，切一個不能把另一個洗掉。
@@ -43,9 +54,12 @@ export default async function ListPage({
     return `/list?${params.toString()}`;
   }
 
-  const statusLabel = STATUS_OPTIONS.find((o) => o.value === status)!.label;
   // 空狀態的「切換到其他狀態」連結：current 沒結果就導去 ended（最可能還找得到
   // 展覽），upcoming／ended 沒結果就導回 current（最常見、最有機會有內容的狀態）。
+  // 搜尋時狀態按鈕整排不存在，這組值不會用到。
+  const statusLabel = status
+    ? STATUS_OPTIONS.find((o) => o.value === status)!.label
+    : undefined;
   const fallbackStatus: ExhibitionStatus =
     status === "current" ? "ended" : "current";
   const fallbackLabel = STATUS_OPTIONS.find(
@@ -54,20 +68,27 @@ export default async function ListPage({
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 sm:px-8 sm:py-16 lg:px-12">
-      <div className="mb-6 flex flex-wrap gap-2 sm:mb-8">
-        {STATUS_OPTIONS.map((option) => (
-          <Button
-            key={option.value}
-            asChild
-            // 選中態沿用 default/outline 的實心／描邊對比，不用標籤那套雜湊色——
-            // 那套色的語意是「主題」，狀態不是主題。
-            variant={option.value === status ? "default" : "outline"}
-            size="sm"
-          >
-            <Link href={hrefForStatus(option.value)}>{option.label}</Link>
-          </Button>
-        ))}
+      <div className="mb-6 sm:mb-8">
+        <SearchBox />
       </div>
+
+      {/* 搜尋時狀態按鈕整排不渲染：見上方 status 的決策註解 */}
+      {!isSearching && (
+        <div className="mb-6 flex flex-wrap gap-2 sm:mb-8">
+          {STATUS_OPTIONS.map((option) => (
+            <Button
+              key={option.value}
+              asChild
+              // 選中態沿用 default/outline 的實心／描邊對比，不用標籤那套雜湊色——
+              // 那套色的語意是「主題」，狀態不是主題。
+              variant={option.value === status ? "default" : "outline"}
+              size="sm"
+            >
+              <Link href={hrefForStatus(option.value)}>{option.label}</Link>
+            </Button>
+          ))}
+        </div>
+      )}
 
       <div className="mb-10 sm:mb-14">
         <TagFilter tags={allTags} />
@@ -78,17 +99,30 @@ export default async function ListPage({
         // 帶著這個標籤點進「現正展出」就是零筆，這段文字＋連結是唯一的出路。
         <div className="py-24 text-center text-muted-foreground">
           <p>
-            {selectedTags.length > 0
-              ? `沒有符合「${selectedTags.join("、")}」的「${statusLabel}」展覽。`
-              : `目前沒有「${statusLabel}」的展覽。`}
+            {isSearching
+              ? selectedTags.length > 0
+                ? `沒有符合「${selectedTags.join("、")}」且名稱含「${q}」的展覽。`
+                : `沒有名稱含「${q}」的展覽。`
+              : selectedTags.length > 0
+                ? `沒有符合「${selectedTags.join("、")}」的「${statusLabel}」展覽。`
+                : `目前沒有「${statusLabel}」的展覽。`}
           </p>
           <p className="mt-2">
-            <Link
-              href={hrefForStatus(fallbackStatus)}
-              className="underline underline-offset-4 hover:text-foreground"
-            >
-              查看{fallbackLabel}的展覽
-            </Link>
+            {isSearching ? (
+              <Link
+                href="/list"
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                清除搜尋
+              </Link>
+            ) : (
+              <Link
+                href={hrefForStatus(fallbackStatus)}
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                查看{fallbackLabel}的展覽
+              </Link>
+            )}
           </p>
         </div>
       ) : (
@@ -102,6 +136,8 @@ export default async function ListPage({
               name={e.name}
               imageUrl={e.imageUrl}
               tags={e.tags.map((et) => et.tag.name)}
+              startDate={e.startDate}
+              endDate={e.endDate}
             />
           ))}
         </div>
