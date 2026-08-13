@@ -1,5 +1,17 @@
 import Image from "next/image";
 import { getPlaqueBackground, needsContrastOverlay } from "@/lib/tagColor";
+import { imageHosts } from "@/lib/imageHosts";
+
+// next/image 遇到不在 remotePatterns 白名單內的 hostname 會在 server render
+// 階段直接 throw（不是載入失敗，onError 接不到），一筆炸掉會讓整頁跟著 500。
+// 所以要在把 src 交給 <Image> 之前，自己先判斷 hostname 在不在白名單內。
+function getHostname(src: string): string | null {
+  try {
+    return new URL(src).hostname;
+  } catch {
+    return null;
+  }
+}
 
 // 展覽圖片：有圖顯示圖、null 或空字串顯示「展牌」（主題色背景＋展覽名大字）。
 // 三頁（詳情、篩選列表、首頁）共用這一個組件——要改占位樣式只改這裡一處。
@@ -21,7 +33,17 @@ export default function ExhibitionImage({
   // 用 trim() 一併擋掉只有空白的字串。
   const hasImage = typeof src === "string" && src.trim() !== "";
 
-  if (!hasImage) {
+  const hostname = hasImage ? getHostname(src) : null;
+  const isAllowedHost =
+    hostname !== null && (imageHosts as readonly string[]).includes(hostname);
+
+  if (hasImage && !isAllowedHost) {
+    console.warn(
+      `ExhibitionImage: 網域不在白名單，退回展牌 fallback — hostname=${hostname ?? "(不合法的 URL)"}, 展覽=${alt}`,
+    );
+  }
+
+  if (!hasImage || !isAllowedHost) {
     // 展牌色：無標籤中性灰、單標籤純色、多標籤線性漸層（跨標籤=跨類，
     // 漸層 vs 拼色在 /lab/colors 比較過，拼色的硬邊在莫蘭迪低彩度下太生硬，選漸層）。
     const showOverlay = needsContrastOverlay(tags);
