@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getRecentExhibitions } from "@exhibly/db";
 import { tagToHsl } from "@/lib/tagColor";
 import ExhibitionCard from "./components/ExhibitionCard";
+import SearchBox from "./components/SearchBox";
 
 // 首頁沒有動態路由參數，Next.js 預設會在 build time 嘗試靜態預產生，
 // 但這頁的「近期展覽」要打 DB，build 環境撈不到就整個 export 失敗。
@@ -53,6 +54,19 @@ export default async function Home() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* 搜尋入口，放在精選主題色塊之後、近期展覽之前，不是標語正下方——
+          擺在標語下面會把搜尋變成主動線，跟「用主題逛台灣的展覽」的定位
+          衝突；放在色塊後面才讀作「沒有你要的主題？直接搜展名」，是逛
+          主題之外的第二條路，服務的是已經知道要找哪檔展的人。
+          直接複用列表頁的 SearchBox，不重寫一份：它送出時本來就是
+          router.push 到 /list?q=...，且只有目前網址已帶 ?tags= 才會
+          保留，首頁網址不帶 tags，行為天生就是「導到 /list?q=、不帶
+          tags」，跟這裡要的一致。細邊框、不上品牌橙，不搶六片色塊的
+          視覺重心（ADR-001：介面克制到近乎隱形）。 */}
+      <div className="mt-8 sm:mt-10">
+        <SearchBox />
       </div>
 
       {/* 近期展覽：跟列表頁同一套卡片，維持 Swiss 網格、手機收成一欄 */}
