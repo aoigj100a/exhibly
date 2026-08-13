@@ -29,6 +29,17 @@ export default function SearchBox() {
     }
 
     const query = params.toString();
+
+    // 這不是為首頁開的特例：組件不判斷自己在哪個路由，只比較「算出來的
+    // 目標網址」跟「現在的網址」有沒有差別——查詢字串算出來是空的，且
+    // 目前網址本來就沒有任何參數，代表 push 了也是同一個地方，直接不做。
+    // 兩個頁面共用同一條規則：首頁空白送出不會平白跳去 /list；/list 頁
+    // 上如果本來就有 q 或 tags，query 就不會是空字串，這條規則不會擋到
+    // 「清空搜尋」該有的那次 push。
+    if (!query && searchParams.toString() === "") {
+      return;
+    }
+
     router.push(query ? `/list?${query}` : "/list");
   }
 
