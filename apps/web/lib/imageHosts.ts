@@ -7,4 +7,8 @@ export const imageHosts = [
   "res.klook.com",
   "imgs2.utiki.com.tw",
   "assets.kktix.io",
+  "media.huashan1914.com",
+  "tour.ibon.com.tw",
+  "event.culture.tw",
+  "www.songshanculturalpark.org"
 ] as const;
