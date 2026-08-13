@@ -6,4 +6,5 @@ export const imageHosts = [
   "event.moc.gov.tw",
   "res.klook.com",
   "imgs2.utiki.com.tw",
+  "assets.kktix.io",
 ] as const;
