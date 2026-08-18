@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getExhibitionStatus } from "@exhibly/db";
-import ExhibitionImage from "./ExhibitionImage";
+import ExhibitionCover from "./ExhibitionCover";
 
 // 展覽卡片：圖／展牌 + 標題，列表頁與首頁「近期展覽」共用同一份，
 // 不要各自刻一套——畫廊網格的卡片長相全站只有這一種。
@@ -31,7 +31,7 @@ export default function ExhibitionCard({
 
   return (
     <Link href={`/exhibition/${id}`} className="group block">
-      <ExhibitionImage
+      <ExhibitionCover
         src={imageUrl}
         alt={name}
         tags={tags}

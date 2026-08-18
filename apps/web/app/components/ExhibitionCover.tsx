@@ -16,7 +16,7 @@ function getHostname(src: string): string | null {
 // 展覽圖片：有圖顯示圖、null 或空字串顯示「展牌」（主題色背景＋展覽名大字）。
 // 三頁（詳情、篩選列表、首頁）共用這一個組件——要改占位樣式只改這裡一處。
 
-export default function ExhibitionImage({
+export default function ExhibitionCover({
   src,
   alt,
   tags = [],
@@ -39,7 +39,7 @@ export default function ExhibitionImage({
 
   if (hasImage && !isAllowedHost) {
     console.warn(
-      `ExhibitionImage: 網域不在白名單，退回展牌 fallback — hostname=${hostname ?? "(不合法的 URL)"}, 展覽=${alt}`,
+      `ExhibitionCover: 網域不在白名單，退回展牌 fallback — hostname=${hostname ?? "(不合法的 URL)"}, 展覽=${alt}`,
     );
   }
 

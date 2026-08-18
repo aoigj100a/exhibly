@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getExhibitionById, getExhibitionStatus } from "@exhibly/db";
 import { Badge } from "@exhibly/ui/components/badge";
-import ExhibitionImage from "../../components/ExhibitionImage";
+import ExhibitionCover from "../../components/ExhibitionCover";
 import { tagToHsl } from "@/lib/tagColor";
 
 // 日期格式化：明確用 UTC 讀，避免執行環境本地時區把「純日期」往回推一天。
@@ -41,7 +41,7 @@ export default async function ExhibitionDetail({
   return (
     <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
       {/* 圖／展牌是這頁的主視覺，比例維持 16:9 不變 */}
-      <ExhibitionImage
+      <ExhibitionCover
         src={exhibition.imageUrl}
         alt={exhibition.name}
         tags={exhibition.tags.map((et) => et.tag.name)}
