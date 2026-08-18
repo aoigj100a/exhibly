@@ -66,7 +66,13 @@ export default function ExhibitionCover({
   return (
     // 外部圖沒有固定尺寸，用 fill 讓 next/image 依 className 給的容器撐開，
     // 同時保留 object-cover 不變形、避免 layout shift。
-    <div className={`relative overflow-hidden ${className}`}>
+    // 容器背景先墊主題色（跟展牌用同一份取色），lazy load 圖片載完的空檔
+    // 顯示的是主題色而不是破圖 icon，圖蓋上去後背景自然被蓋住，不需要
+    // onLoad 之類的狀態去切換。
+    <div
+      className={`relative overflow-hidden ${className}`}
+      style={getPlaqueBackground(tags)}
+    >
       <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
     </div>
   );
