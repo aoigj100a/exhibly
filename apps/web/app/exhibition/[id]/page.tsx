@@ -100,24 +100,50 @@ export default async function ExhibitionDetail({
           </>
         )}
 
-        {exhibition.isFree !== null && (
+        {exhibition.openingHours && (
+          <>
+            <dt className="text-sm font-medium text-muted-foreground">
+              開放時間
+            </dt>
+            <dd className="text-sm leading-relaxed whitespace-pre-line">
+              {exhibition.openingHours}
+            </dd>
+          </>
+        )}
+
+        {/* isFree 與 price 是兩個獨立欄位，各自判斷是否有值。
+            isFree 為 null 的語意是「不知道免不免費」，不是「這筆沒有
+            票價資訊」——不能用它的空值去否決 price 已知的事實，
+            那樣會把資料庫裡有的資訊藏起來。 */}
+        {(exhibition.isFree !== null || exhibition.price) && (
           <>
             <dt className="text-sm font-medium text-muted-foreground">票價</dt>
             <dd>
-              {/* 淡彩（tonal）風格：bg-primary/10 淡橘底 + 深字，對比 ~13:1，
-                  遠高於實心橘底配深字的 5.1:1，跟旁邊的淡莫蘭迪標籤調性一致。
-                  variant 用 outline 當底，不用 default（不然要跟它自帶的
-                  bg-primary/text-primary-foreground 打架）。 */}
-              <Badge
-                variant="outline"
-                className={
-                  exhibition.isFree
-                    ? "border-transparent bg-primary/10 text-sm font-semibold text-gray-800"
-                    : "text-sm font-semibold"
-                }
-              >
-                {exhibition.isFree ? "免費" : "收費"}
-              </Badge>
+              {exhibition.isFree !== null && (
+                /* 淡彩（tonal）風格：bg-primary/10 淡橘底 + 深字，對比 ~13:1，
+                   遠高於實心橘底配深字的 5.1:1，跟旁邊的淡莫蘭迪標籤調性一致。
+                   variant 用 outline 當底，不用 default（不然要跟它自帶的
+                   bg-primary/text-primary-foreground 打架）。 */
+                <Badge
+                  variant="outline"
+                  className={
+                    exhibition.isFree
+                      ? "border-transparent bg-primary/10 text-sm font-semibold text-gray-800"
+                      : "text-sm font-semibold"
+                  }
+                >
+                  {exhibition.isFree ? "免費" : "收費"}
+                </Badge>
+              )}
+              {exhibition.price && (
+                <p
+                  className={`text-sm whitespace-pre-line ${
+                    exhibition.isFree !== null ? "mt-1.5" : ""
+                  }`}
+                >
+                  {exhibition.price}
+                </p>
+              )}
             </dd>
           </>
         )}
