@@ -10,7 +10,9 @@ import SearchBox from "./components/SearchBox";
 export const dynamic = "force-dynamic";
 
 // 精選主題：目前寫死，之後要動態化（例如撈出展覽數最多的標籤）再改成從 db 撈。
-const featured = ["動漫", "懷舊", "原住民文化", "當代藝術", "沉浸式", "好拍"];
+// ADR-003 之後只能挑 MOOD——SUBJECT 已經不上色，混進來會跟詳情頁/篩選頁的
+// 「題材不填色」自相矛盾。色塊牆（M6）之前，這四個先頂著當首頁主題入口。
+const featured = ["知性", "懷舊", "可愛", "親子"];
 
 export default async function Home() {
   // 近期展覽：依展期排序撈最近的幾筆真實資料，填補主題入口下方的空白，
@@ -18,7 +20,7 @@ export default async function Home() {
   const recentExhibitions = await getRecentExhibitions();
 
   return (
-    // 內容量小（僅 11 筆展覽、6 個精選主題），刻意不用大留白撐場——
+    // 內容量小（僅 11 筆展覽、4 個精選主題），刻意不用大留白撐場——
     // 留白靠首屏標題的字級對比撐開，網格本身維持緊湊，避免顯得像沒做完。
     <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
       <header className="mb-10 text-center sm:mb-14">
@@ -37,7 +39,7 @@ export default async function Home() {
           text-gray-800，可點提示改用透明度變化（色塊本身已經是視覺重量，
           不需要再疊邊框）。
           中文標籤用 encodeURIComponent 編碼，避免特殊字元把 query string 打亂。 */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:gap-6">
         {featured.map((name) => (
           <Link
             key={name}
@@ -63,7 +65,7 @@ export default async function Home() {
           直接複用列表頁的 SearchBox，不重寫一份：它送出時本來就是
           router.push 到 /list?q=...，且只有目前網址已帶 ?tags= 才會
           保留，首頁網址不帶 tags，行為天生就是「導到 /list?q=、不帶
-          tags」，跟這裡要的一致。細邊框、不上品牌橙，不搶六片色塊的
+          tags」，跟這裡要的一致。細邊框、不上品牌橙，不搶四片色塊的
           視覺重心（ADR-001：介面克制到近乎隱形）。 */}
       <div className="mt-8 sm:mt-10">
         <SearchBox />
