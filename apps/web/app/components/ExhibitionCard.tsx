@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getExhibitionStatus } from "@exhibly/db";
 import ExhibitionCover from "./ExhibitionCover";
+import type { PlaqueTag } from "@/lib/tagColor";
 
 // 展覽卡片：圖／展牌 + 標題，列表頁與首頁「近期展覽」共用同一份，
 // 不要各自刻一套——畫廊網格的卡片長相全站只有這一種。
@@ -16,7 +17,7 @@ export default function ExhibitionCard({
   id: string;
   name: string;
   imageUrl: string | null;
-  tags: string[];
+  tags: PlaqueTag[];
   startDate?: Date;
   endDate?: Date | null;
   sizes?: string;

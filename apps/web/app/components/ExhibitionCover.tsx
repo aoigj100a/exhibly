@@ -1,5 +1,9 @@
 import Image from "next/image";
-import { getPlaqueBackground, needsContrastOverlay } from "@/lib/tagColor";
+import {
+  getPlaqueBackground,
+  PLAQUE_TEXT_COLOR,
+  type PlaqueTag,
+} from "@/lib/tagColor";
 import { imageHosts } from "@/lib/imageHosts";
 
 // next/image 遇到不在 remotePatterns 白名單內的 hostname 會在 server render
@@ -25,7 +29,7 @@ export default function ExhibitionCover({
 }: {
   src: string | null;
   alt: string;
-  tags?: string[];
+  tags?: PlaqueTag[];
   className?: string;
   sizes?: string;
 }) {
@@ -44,19 +48,20 @@ export default function ExhibitionCover({
   }
 
   if (!hasImage || !isAllowedHost) {
-    // 展牌色：無標籤中性灰、單標籤純色、多標籤線性漸層（跨標籤=跨類，
-    // 漸層 vs 拼色在 /lab/colors 比較過，拼色的硬邊在莫蘭迪低彩度下太生硬，選漸層）。
-    const showOverlay = needsContrastOverlay(tags);
-
+    // 展牌色：只看 MOOD 標籤（ADR-003），零 MOOD 中性灰、單 MOOD 純色、
+    // 多 MOOD 線性漸層（拼色 vs 漸層在 /lab/colors 比較過，選漸層）。
+    // 文字色固定用 PLAQUE_TEXT_COLOR，已針對全部 MOOD 色相驗過對比，
+    // 不用再依背景動態算、疊遮罩。
     return (
       <div
         className={`relative flex items-center justify-center overflow-hidden p-4 text-center ${className}`}
         style={getPlaqueBackground(tags)}
       >
-        {/* 對比不足時疊極淡遮罩，不動字色邏輯本身 */}
-        {showOverlay && <div className="absolute inset-0 bg-white/40" />}
         {/* 圖片區在列表/詳情頁都是主視覺尺寸的容器了，字級跟著放大撐住份量 */}
-        <span className="relative z-10 line-clamp-3 text-base leading-snug font-bold text-gray-800 sm:text-xl">
+        <span
+          className="relative z-10 line-clamp-3 text-base leading-snug font-bold sm:text-xl"
+          style={{ color: PLAQUE_TEXT_COLOR }}
+        >
           {alt}
         </span>
       </div>

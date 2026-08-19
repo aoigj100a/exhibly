@@ -83,7 +83,7 @@ export default async function Home() {
                 id={e.id}
                 name={e.name}
                 imageUrl={e.imageUrl}
-                tags={e.tags.map((et) => et.tag.name)}
+                tags={e.tags.map((et) => et.tag)}
               />
             ))}
           </div>

@@ -135,7 +135,7 @@ export default async function ListPage({
               id={e.id}
               name={e.name}
               imageUrl={e.imageUrl}
-              tags={e.tags.map((et) => et.tag.name)}
+              tags={e.tags.map((et) => et.tag)}
               startDate={e.startDate}
               endDate={e.endDate}
             />
