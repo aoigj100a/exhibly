@@ -41,16 +41,31 @@ export default function TagFilter({
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => {
         const isSelected = selected.includes(tag.name);
+        const isMood = tag.category === "MOOD";
         return (
           <Button
             key={tag.id}
             onClick={() => toggle(tag.name)}
-            // 選中 = 實心(該標籤的莫蘭迪色)、未選 = 描邊，實心/空心的結構性對比
-            // 不會因為色相相近就分不清楚——這是刻意保留 M2 的選中態辨識度。
+            // MOOD：選中 = 實心(該標籤的莫蘭迪色)、未選 = 描邊，實心/空心的
+            // 結構性對比不會因為色相相近就分不清楚，M2 定案的選中態辨識度。
+            // SUBJECT：ADR-003 之後不吃色相，選中態改固定深底，不能再靠
+            // tagToHsl 撐對比——不然題材的兩個狀態會長一樣。
             variant={isSelected ? "default" : "outline"}
             size="sm"
-            className={isSelected ? "border-transparent text-gray-800 hover:opacity-90" : undefined}
-            style={isSelected ? { backgroundColor: tagToHsl(tag.name) } : undefined}
+            className={
+              isSelected
+                ? isMood
+                  ? "border-transparent text-gray-800 hover:opacity-90"
+                  : "border-transparent bg-gray-700 text-white hover:bg-gray-700/90"
+                : !isMood
+                  ? "border-gray-400 text-gray-600"
+                  : undefined
+            }
+            style={
+              isSelected && isMood
+                ? { backgroundColor: tagToHsl(tag.name) }
+                : undefined
+            }
           >
             {tag.name}
           </Button>

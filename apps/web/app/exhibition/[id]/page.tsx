@@ -151,17 +151,30 @@ export default async function ExhibitionDetail({
         {exhibition.tags.length > 0 && (
           <>
             <dt className="text-sm font-medium text-muted-foreground">標籤</dt>
+            {/* ADR-003：氛圍(MOOD)維持實心莫蘭迪色塊；題材(SUBJECT)不填色，
+                改 #標籤名 的框線樣式——差別在「有沒有填色」，不是配色本身，
+                題材不吃色相額度。 */}
             <dd className="flex flex-wrap gap-2">
-              {exhibition.tags.map((et) => (
-                <Badge
-                  key={et.tagId}
-                  variant="secondary"
-                  className="text-gray-800"
-                  style={{ backgroundColor: tagToHsl(et.tag.name) }}
-                >
-                  {et.tag.name}
-                </Badge>
-              ))}
+              {exhibition.tags.map((et) =>
+                et.tag.category === "MOOD" ? (
+                  <Badge
+                    key={et.tagId}
+                    variant="secondary"
+                    className="text-gray-800"
+                    style={{ backgroundColor: tagToHsl(et.tag.name) }}
+                  >
+                    {et.tag.name}
+                  </Badge>
+                ) : (
+                  <Badge
+                    key={et.tagId}
+                    variant="outline"
+                    className="border-gray-400 text-gray-600"
+                  >
+                    #{et.tag.name}
+                  </Badge>
+                ),
+              )}
             </dd>
           </>
         )}
