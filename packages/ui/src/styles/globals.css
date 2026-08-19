@@ -3,6 +3,7 @@
 @source "../../../../apps/web/app/**/*.{ts,tsx}";
 @source "../../../../apps/admin/app/**/*.{ts,tsx}";
 @source "../";
+@source "../../../../apps/web/app/lab/**/*.tsx";
 
 :root {
   --background: oklch(1 0 0);
