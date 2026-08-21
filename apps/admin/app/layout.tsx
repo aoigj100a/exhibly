@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@exhibly/ui/globals.css";
+import AccountBar from "./components/AccountBar";
 
 export const metadata: Metadata = {
   title: "Exhibly Admin",
@@ -12,7 +13,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant">
-      <body>{children}</body>
+      <body>
+        <AccountBar />
+        {children}
+      </body>
     </html>
   );
 }
