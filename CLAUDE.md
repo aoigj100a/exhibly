@@ -5,7 +5,7 @@
 - **Monorepo**：Turborepo + pnpm
 - **前端**：Next.js（App Router）、React、Tailwind CSS v4、shadcn/ui
 - **資料層**：Prisma 7（driver adapter 架構）
-- **資料庫**：本地開發 SQLite → 正式環境 Supabase PostgreSQL
+- **資料庫**：開發環境 Docker PostgreSQL / 正式環境 Supabase PostgreSQL
 - **部署**：Vercel
 
 ## Environments
