@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma, Prisma } from "@exhibly/db";
+import { requireAuth } from "@/lib/auth-guard";
 
 // 表單欄位清單，統一從這裡引用，讀值、回填、型別都靠它保持一致。
 const EXHIBITION_FIELDS = [
@@ -97,6 +98,8 @@ export async function createExhibition(
   _prevState: CreateExhibitionWithTagsState,
   formData: FormData
 ): Promise<CreateExhibitionWithTagsState> {
+  await requireAuth();
+
   const values = readValues(formData);
   const tagIds = readTagIds(formData);
   const errors: Partial<Record<ExhibitionField, string>> = {};
@@ -156,6 +159,8 @@ export async function updateExhibition(
   _prevState: CreateExhibitionState,
   formData: FormData
 ): Promise<CreateExhibitionState> {
+  await requireAuth();
+
   const values = readValues(formData);
   const errors: Partial<Record<ExhibitionField, string>> = {};
 
@@ -210,6 +215,8 @@ export async function createTag(
   _prevState: CreateTagState,
   formData: FormData
 ): Promise<CreateTagState> {
+  await requireAuth();
+
   const name = String(formData.get("name") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
   const values = { name, category };
@@ -253,6 +260,8 @@ export async function createTag(
 // 是兩件事（詳見 schema 裡 Tag.isListed 的註解）。這裡只切開關，
 // 不動 name／category，改名跟刪除都還沒做。
 export async function toggleTagListed(formData: FormData) {
+  await requireAuth();
+
   const tagId = formData.get("tagId");
   const nextIsListed = formData.get("nextIsListed");
 
@@ -271,6 +280,8 @@ export async function toggleTagListed(formData: FormData) {
 // ExhibitionTag 對 Exhibition 的關聯是 onDelete: Cascade（見 schema），
 // 刪展覽時資料庫會自動一併清掉關聯列，這裡不用手動先刪 ExhibitionTag。
 export async function deleteExhibition(formData: FormData) {
+  await requireAuth();
+
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
     throw new Error("缺少展覽 id");
@@ -289,6 +300,8 @@ export async function updateExhibitionTags(
   exhibitionId: string,
   formData: FormData
 ) {
+  await requireAuth();
+
   const tagIds = readTagIds(formData);
 
   await prisma.$transaction([
