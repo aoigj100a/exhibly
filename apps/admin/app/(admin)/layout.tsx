@@ -1,4 +1,5 @@
 import AccountBar from "./components/AccountBar";
+import GuestBanner from "./components/GuestBanner";
 
 export default function AdminLayout({
   children,
@@ -8,6 +9,7 @@ export default function AdminLayout({
   return (
     <>
       <AccountBar />
+      <GuestBanner />
       {children}
     </>
   );
