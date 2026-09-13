@@ -92,7 +92,7 @@ export async function getExhibitionById(id: string) {
 export function getRecentExhibitions() {
   return prisma.exhibition.findMany({
     where: statusWhere("current", taipeiToday()),
-    orderBy: { startDate: "desc" },
+    orderBy: [{ startDate: "desc" }, { name: "asc" }],
     take: 6,
     include: exhibitionInclude,
   });
