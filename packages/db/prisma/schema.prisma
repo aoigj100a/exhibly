@@ -30,11 +30,16 @@ model Exhibition {
   updatedAt   DateTime @updatedAt
 }
 
+enum TagCategory {
+  SUBJECT
+  MOOD
+}
+
 // 主題 (動漫、療癒、科技藝術…)
 model Tag {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  category    String   // "SUBJECT" 或 "MOOD" PostgreSQL 已經換了，enum 卻還沒升
+  id          String      @id @default(cuid())
+  name        String      @unique
+  category    TagCategory
   // 只控制「是否出現在選單」，不是這個標籤能不能用——關掉之後
   // 仍可貼在展覽上、仍可被 ?tags= 直達篩到、詳情頁 Badge 照常顯示。
   // 故意不叫 isVisible：那個字暗示標籤到處都看不見，但它其實到處
