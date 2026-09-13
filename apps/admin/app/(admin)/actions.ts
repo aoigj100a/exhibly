@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma, Prisma } from "@exhibly/db";
+import type { TagCategory } from "@exhibly/db";
 import { requireAuth } from "@/lib/auth-guard";
 
 // 表單欄位清單，統一從這裡引用，讀值、回填、型別都靠它保持一致。
@@ -204,6 +205,10 @@ export async function updateExhibition(
 
 const TAG_CATEGORY_VALUES = ["SUBJECT", "MOOD"] as const;
 
+function isTagCategory(value: string): value is TagCategory {
+  return (TAG_CATEGORY_VALUES as readonly string[]).includes(value);
+}
+
 export type CreateTagState = {
   errors: Partial<Record<"name" | "category", string>>;
   values: { name: string; category: string };
@@ -225,14 +230,19 @@ export async function createTag(
   if (name === "") {
     errors.name = "請輸入標籤名稱";
   }
-  if (
-    !TAG_CATEGORY_VALUES.includes(category as (typeof TAG_CATEGORY_VALUES)[number])
-  ) {
+  if (!isTagCategory(category)) {
     errors.category = "請選擇分類";
   }
 
   if (Object.keys(errors).length > 0) {
     return { errors, values };
+  }
+
+  // 上面已經擋過不合法值，這裡實際上不會進到 true 分支，只是讓型別系統
+  // 把 category 從 string 窄化成 TagCategory——單靠上面那個 if 窄化不會
+  // 往下傳，因為它的 true 分支沒有 return。
+  if (!isTagCategory(category)) {
+    return { errors: { category: "請選擇分類" }, values };
   }
 
   try {
