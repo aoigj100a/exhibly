@@ -1,8 +1,19 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getExhibitionById, getExhibitionStatus } from "@exhibly/db";
+import {
+  getExhibitionById as getExhibitionByIdFromDb,
+  getExhibitionStatus,
+} from "@exhibly/db";
 import { Badge } from "@exhibly/ui/components/badge";
 import ExhibitionCover from "../../components/ExhibitionCover";
 import { tagToHsl } from "@/lib/tagColor";
+
+// generateMetadata 跟頁面元件在同一次 request 裡都要這筆展覽資料。
+// Next.js 只會幫忙合併 fetch() 呼叫，Prisma 查詢不算在內，兩邊各自
+// call 會變成同一個 id 查兩次 DB。用 React cache() 包一層，同一次
+// render pass 對同個 id 的呼叫共用同一個 promise，第二次不會真的送查詢。
+const getExhibitionById = cache(getExhibitionByIdFromDb);
 
 // 日期格式化：明確用 UTC 讀，避免執行環境本地時區把「純日期」往回推一天。
 // 存進 SQLite 的是 UTC 午夜（例：2026-08-01T00:00:00Z），
@@ -13,6 +24,65 @@ const dateFmt = new Intl.DateTimeFormat("zh-TW", {
   day: "numeric",
   timeZone: "UTC",
 });
+
+// 場館 / 城市可能為 null，過濾掉再用「・」串起來，避免出現「・台北」這種開頭。
+// generateMetadata 的 fallback 描述也要組「地點」，抽出來讓兩邊共用同一份邏輯。
+function formatPlace(exhibition: { venue: string | null; city: string | null }) {
+  return [exhibition.venue, exhibition.city].filter(Boolean).join("・");
+}
+
+// 同上，抽出來給 generateMetadata 共用，避免另寫一份日期格式化邏輯。
+function formatDateRange(exhibition: { startDate: Date; endDate: Date | null }) {
+  return exhibition.endDate
+    ? `${dateFmt.format(exhibition.startDate)} – ${dateFmt.format(exhibition.endDate)}`
+    : `${dateFmt.format(exhibition.startDate)} 起`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const exhibition = await getExhibitionById(id);
+
+  // 查無展覽：不拋錯、也不特別設定 metadata，把 404 交回頁面元件的
+  // notFound() 處理，Next.js 對 404 頁面自己有預設 metadata。
+  if (!exhibition) {
+    return {};
+  }
+
+  const description = exhibition.description
+    ? truncateDescription(exhibition.description, 150)
+    : fallbackDescription(exhibition);
+
+  return {
+    title: `${exhibition.name}｜Exhibly`,
+    description,
+  };
+}
+
+// 簡介換行壓成空白、trim 頭尾，超過 maxLength 字截斷並加「…」。
+function truncateDescription(description: string, maxLength: number) {
+  const collapsed = description.replace(/\s+/g, " ").trim();
+  return collapsed.length > maxLength
+    ? `${collapsed.slice(0, maxLength)}…`
+    : collapsed;
+}
+
+// 簡介為 null 時的 fallback：用展期・地點組一句，不落回全站預設描述。
+// place 理論上不會是空字串（dev 庫每一筆都有 venue/city），但這裡仍防一下，
+// 避免真的遇到兩者皆空時留下「展期起・」這種孤零零的分隔符。
+function fallbackDescription(exhibition: {
+  startDate: Date;
+  endDate: Date | null;
+  venue: string | null;
+  city: string | null;
+}) {
+  const place = formatPlace(exhibition);
+  const dateRange = formatDateRange(exhibition);
+  return place ? `${dateRange}・${place}` : dateRange;
+}
 
 export default async function ExhibitionDetail({
   params,
@@ -31,12 +101,8 @@ export default async function ExhibitionDetail({
   // 有人存了書籤、搜尋引擎還索引著，從列表消失不代表從系統消失。
   const status = getExhibitionStatus(exhibition);
 
-  // 場館 / 城市可能為 null，過濾掉再用「・」串起來，避免出現「・台北」這種開頭
-  const place = [exhibition.venue, exhibition.city].filter(Boolean).join("・");
-
-  const dateRange = exhibition.endDate
-    ? `${dateFmt.format(exhibition.startDate)} – ${dateFmt.format(exhibition.endDate)}`
-    : `${dateFmt.format(exhibition.startDate)} 起`;
+  const place = formatPlace(exhibition);
+  const dateRange = formatDateRange(exhibition);
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12 sm:px-8 sm:py-16">
