@@ -82,24 +82,6 @@ export default async function ExhibitionDetail({
           </>
         )}
 
-        {exhibition.officialUrl && (
-          <>
-            <dt className="text-sm font-medium text-muted-foreground">
-              官方網站
-            </dt>
-            <dd className="text-sm">
-              <a
-                href={exhibition.officialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-4 hover:text-foreground"
-              >
-                前往官方網站
-              </a>
-            </dd>
-          </>
-        )}
-
         {exhibition.openingHours && (
           <>
             <dt className="text-sm font-medium text-muted-foreground">
@@ -188,6 +170,29 @@ export default async function ExhibitionDetail({
           </>
         )}
       </dl>
+
+      {/* 官方連結從 dl 移出來跟提示綁在一起：提示每一頁都有、位置固定，
+          連結永遠緊鄰提示，讀到「去確認公告」的人下一眼就看得到能點去哪。
+          留在 dl 裡的話，沒有 officialUrl 的頁面提示會孤零零落在別處，
+          有的頁面則等於出現兩個官方連結入口。 */}
+      <p className="mt-8 text-sm text-muted-foreground sm:mt-10">
+        展期與票價可能變動，前往前請先確認官方公告
+        {exhibition.officialUrl && (
+          <>
+            {" "}
+            {/* 提示語本身在手機寬度就快占滿一行，連結接在後面一定會換行。
+                nowrap 讓它整塊掉到下一行，而不是斷在詞中間、底線也跟著斷兩截。 */}
+            <a
+              href={exhibition.officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4 whitespace-nowrap hover:text-foreground"
+            >
+              前往官方網站
+            </a>
+          </>
+        )}
+      </p>
     </main>
   );
 }
