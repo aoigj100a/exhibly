@@ -51,3 +51,40 @@
   --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui,
     sans-serif;
 }
+
+/* 首頁精選主題色塊牆（M6）的微浮動。只用 apps/web/app/page.tsx，其他頁面
+   沒有 .featured-plaque 這個 class，放全站 globals.css 純粹是因為這是
+   目前唯一的全站 CSS 入口，不代表要給其他頁面用。
+   只用 transform: translateY，不用 top——transform 走合成層，不會逐幀
+   重算 layout，四塊一起跑在手機上才不會掉幀。animation-duration／
+   animation-delay 由 page.tsx 逐塊帶入行內樣式（四塊週期、起始時間都不同，
+   永遠不會同步），這裡只放共用的 keyframes 跟開關規則。 */
+@keyframes featured-plaque-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.featured-plaque {
+  animation-name: featured-plaque-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* hover 讓那一塊停下來，不是放大——可點提示交給既有的
+   group-hover:opacity-90，這裡只管動畫本身。 */
+.featured-plaque:hover {
+  animation-play-state: paused;
+}
+
+/* 可近性跟 ADR-002 量 WCAG 對比是同一種重視，不是可選項：
+   系統開了「減少動態」就整個關掉，不是放慢或縮小幅度。 */
+@media (prefers-reduced-motion: reduce) {
+  .featured-plaque {
+    animation: none;
+  }
+}

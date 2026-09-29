@@ -14,6 +14,29 @@ export const dynamic = "force-dynamic";
 // 「題材不填色」自相矛盾。色塊牆（M6）之前，這四個先頂著當首頁主題入口。
 const featured = ["知性", "懷舊", "可愛", "親子"];
 
+// 色塊牆形狀：/lab/homepage-shapes 候選 2（輕微有機）定案的數值，不是
+// 這裡另外調的。四塊用同一組 H/V 各自循環位移一格——扭曲量相同、方向
+// 不同，不是四組各自的亂數；位移沿用 TL/TR/BR/BL 的角序。
+const FEATURED_SHAPE_H: [number, number, number, number] = [38, 24, 34, 28];
+const FEATURED_SHAPE_V: [number, number, number, number] = [26, 36, 22, 40];
+
+function rotateCorners(tuple: [number, number, number, number], shift: number) {
+  return [0, 1, 2, 3].map((i) => tuple[(i + shift) % 4]);
+}
+
+function featuredBorderRadius(index: number): string {
+  const h = rotateCorners(FEATURED_SHAPE_H, index);
+  const v = rotateCorners(FEATURED_SHAPE_V, index);
+  return `${h[0]}% ${h[1]}% ${h[2]}% ${h[3]}% / ${v[0]}% ${v[1]}% ${v[2]}% ${v[3]}%`;
+}
+
+// 微浮動：四塊各自不同週期＋不同起始 delay，永遠不會同步（同步的話看起來
+// 像整區在抖，不像各自在漂）。動畫本體（transform、暫停、reduced-motion）
+// 定義在 packages/ui/src/styles/globals.css 的 .featured-plaque，這裡只
+// 決定每一塊的時間參數。
+const FEATURED_FLOAT_DURATIONS = ["6s", "6.8s", "7.4s", "8s"];
+const FEATURED_FLOAT_DELAYS = ["0s", "0.6s", "1.2s", "1.8s"];
+
 export default async function Home() {
   // 近期展覽：依展期排序撈最近的幾筆真實資料，填補主題入口下方的空白，
   // 用跟列表頁同一顆 ExhibitionCard，不要另外刻一種卡片長相。
@@ -38,17 +61,24 @@ export default async function Home() {
           一片主題色 + 標題，跟全站的展牌視覺語言同源。深色字沿用展牌的
           text-gray-800，可點提示改用透明度變化（色塊本身已經是視覺重量，
           不需要再疊邊框）。
-          中文標籤用 encodeURIComponent 編碼，避免特殊字元把 query string 打亂。 */}
+          中文標籤用 encodeURIComponent 編碼，避免特殊字元把 query string 打亂。
+          形狀（有機圓角）跟微浮動是 M6 色塊牆定案的第一步，數值來源見上面
+          FEATURED_SHAPE_*／FEATURED_FLOAT_* 的註解。 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:gap-6">
-        {featured.map((name) => (
+        {featured.map((name, i) => (
           <Link
             key={name}
             href={`/list?tags=${encodeURIComponent(name)}`}
             className="group"
           >
             <div
-              className="flex h-20 items-center justify-center p-4 text-center transition-opacity group-hover:opacity-90 sm:h-24"
-              style={{ backgroundColor: tagToHsl(name) }}
+              className="featured-plaque flex h-20 items-center justify-center p-4 text-center transition-opacity group-hover:opacity-90 sm:h-24"
+              style={{
+                backgroundColor: tagToHsl(name),
+                borderRadius: featuredBorderRadius(i),
+                animationDuration: FEATURED_FLOAT_DURATIONS[i],
+                animationDelay: FEATURED_FLOAT_DELAYS[i],
+              }}
             >
               <span className="text-lg font-semibold tracking-tight text-gray-800 sm:text-xl">
                 {name}
