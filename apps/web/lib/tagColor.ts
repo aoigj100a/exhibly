@@ -22,7 +22,9 @@ export interface PlaqueTag {
 export const PLAQUE_TEXT_COLOR = "hsl(15, 70%, 25%)";
 
 // 31 進位字串雜湊（同 Java String.hashCode() 算法），
-// 保證同一個標籤字串永遠對應同一個色相。
+// 保證同一個標籤字串永遠對應同一個色相。ADR-004 手工表定案後，這個函式
+// 退居 fallback：新增或改名 MOOD 詞、還沒補進 MOOD_HUE_MAP 之前，靠它
+// 撐著不要整個掉回中性灰或撞色到看不出來。
 export function hashTagToHue(name: string): number {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -31,8 +33,48 @@ export function hashTagToHue(name: string): number {
   return hash % 360;
 }
 
+// ADR-004 定案：MOOD 色相改手工指定，不再讓雜湊決定。原因是十個雜湊值
+// 裡有四個擠在綠帶（約 85–150 度）附近，人眼在這段的色相解析度最差，
+// 擠在一起等於看起來全部一樣；而藍紫段反而大片空著。
+//
+// 分配邏輯不是把 360 度平均切十份：
+// - 綠帶（85–150）人眼解析度最差，整段只留一個名額給「親子」，
+//   前後刻意留大間距（絢爛→親子 55 度、親子→好拍 48 度）隔開鄰居；
+// - 藍紫段（好拍→…→可愛）辨識度中等，五個詞等距排開，每個間隔 34 度；
+// - 紅粉褐段（可愛→震撼→懷舊→絢爛，跨 0 度）人眼辨識度最高，可以排
+//   最密，間隔壓到 27～30 度。
+//
+// 只收 MOOD：SUBJECT 不吃色（ADR-003），這張表沒有、也不該有 SUBJECT 的詞。
+const MOOD_HUE_MAP: Record<string, number> = {
+  懷舊: 25,
+  絢爛: 55,
+  親子: 110,
+  好拍: 158,
+  知性: 192,
+  沉浸式: 226,
+  詭譎: 260,
+  奇幻: 294,
+  可愛: 328,
+  震撼: 355,
+};
+
+// 查表查不到（新詞、改名、或誤傳 SUBJECT 名稱進來）就落回 hashTagToHue，
+// 並在 dev 環境印一行 WARN——症狀從「安靜地撞色」變成「顏色怪 + 一行提醒」，
+// 才不會在正式環境也吵，也不會讓人以為是刻意設計成雜湊色。
+function resolveMoodHue(name: string): number {
+  const hue = MOOD_HUE_MAP[name];
+  if (hue !== undefined) return hue;
+
+  if (process.env.NODE_ENV !== "production") {
+    console.warn(
+      `[tagColor] MOOD 標籤「${name}」不在 MOOD_HUE_MAP，落回 hashTagToHue`,
+    );
+  }
+  return hashTagToHue(name);
+}
+
 export function tagToHsl(name: string): string {
-  const hue = hashTagToHue(name);
+  const hue = resolveMoodHue(name);
   return `hsl(${hue}, ${SATURATION}%, ${LIGHTNESS}%)`;
 }
 
