@@ -16,4 +16,5 @@ export const imageHosts = [
   "www.tfam.museum",
   "umkt.jutfoundation.org.tw",
   "www.travel.taipei",
+  "mediasphere.com.tw"
 ] as const;
