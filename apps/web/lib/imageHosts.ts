@@ -11,5 +11,9 @@ export const imageHosts = [
   "tour.ibon.com.tw",
   "event.culture.tw",
   "www.songshanculturalpark.org",
-  "www.kmfa.gov.tw"
+  "www.kmfa.gov.tw",
+  "vrzekgrnobhlztdznsml.supabase.co",
+  "www.tfam.museum",
+  "umkt.jutfoundation.org.tw",
+  "www.travel.taipei",
 ] as const;
