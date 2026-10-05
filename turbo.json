@@ -6,7 +6,12 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"],
-      "env": ["ADMIN_EMAIL"]
+      "env": [
+        "ADMIN_EMAIL",
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_BUCKET"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]

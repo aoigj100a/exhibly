@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getExhibitionById } from "@exhibly/db";
+import { Button } from "@exhibly/ui/components/button";
+import { uploadExhibitionImage } from "../../actions";
 import EditExhibitionForm from "./EditExhibitionForm";
 
 // yyyy-MM-dd，跟 <input type="date"> 需要的格式一致。用 toISOString 取
@@ -56,11 +58,38 @@ export default async function EditExhibitionPage({
         <h1 className="mt-2 text-3xl font-bold tracking-tight">編輯展覽</h1>
       </header>
 
+      {/* 獨立一張表單、不塞進 EditExhibitionForm：<form> 不能巢狀，
+          而且上傳是直接改 imageUrl 的另一個動作，不跟「儲存」綁在一起。 */}
+      <form
+        action={uploadExhibitionImage.bind(null, exhibition.id)}
+        className="mb-8 space-y-1.5"
+      >
+        <label htmlFor="image" className="text-sm font-medium">
+          上傳圖片
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            required
+            className="text-sm"
+          />
+          <Button type="submit" variant="outline">
+            上傳
+          </Button>
+        </div>
+      </form>
+
       {/* key 綁 id：防止之後從某個 /x/edit 直接連到 /y/edit 時，同一個
           client 元件被留用，導致 useActionState 的初始值不會重算成
-          新這筆的資料。 */}
+          新這筆的資料。
+          再加上 imageUrl：上傳後頁面會重新渲染但元件不會卸載，
+          useActionState 仍拿著舊的圖片網址，接著按「儲存」就會把剛上傳
+          的網址蓋回舊值。imageUrl 變了就換 key，讓表單用新值重建。 */}
       <EditExhibitionForm
-        key={exhibition.id}
+        key={`${exhibition.id}:${exhibition.imageUrl ?? ""}`}
         exhibitionId={exhibition.id}
         initialValues={initialValues}
       />

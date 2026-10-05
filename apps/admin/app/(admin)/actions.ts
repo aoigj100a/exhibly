@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 import { prisma, Prisma } from "@exhibly/db";
 import type { TagCategory } from "@exhibly/db";
 import { requireAuth } from "@/lib/auth-guard";
@@ -324,4 +325,67 @@ export async function updateExhibitionTags(
   revalidatePath("/");
   revalidatePath(`/${exhibitionId}/tags`);
   redirect("/");
+}
+
+// 副檔名從 MIME type 推，不從原始檔名取：檔名是使用者給的，不可信也
+// 不一定有副檔名。這裡只列 bucket 允許的三種，型別真正的把關在 bucket
+// 那層（allowed MIME types），不在清單內的就給空副檔名，交給 bucket 拒絕。
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+// 伺服器代傳：檔案經過這支 action，用 service role key 上傳，bucket 的
+// policies 維持 0 條（瀏覽器端完全沒有寫入權限）。
+// client 在函式裡建立、不放模組最上層：這三個環境變數沒宣告在 turbo.json，
+// 放最上層會在 build 期就去讀，讀不到就讓建置爆掉。
+export async function uploadExhibitionImage(
+  exhibitionId: string,
+  formData: FormData
+) {
+  await requireAuth();
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const bucket = process.env.SUPABASE_BUCKET;
+  if (!supabaseUrl || !serviceRoleKey || !bucket) {
+    throw new Error(
+      "圖片上傳設定不完整：請確認 SUPABASE_URL、SUPABASE_SERVICE_ROLE_KEY、SUPABASE_BUCKET 三個環境變數都有設定"
+    );
+  }
+
+  const file = formData.get("image");
+  if (!(file instanceof File) || file.size === 0) {
+    throw new Error("沒有選擇圖片檔案");
+  }
+
+  // 檔名自己產生：中文原始檔名會被轉成很長的十六進位字串，日後在
+  // storage 後台找不到；也避免不同展覽都傳 banner.jpg 互相覆蓋。
+  // 每次用新的時間戳、不覆寫舊檔，順便避開 CDN 快取到舊圖。
+  const extension = IMAGE_EXTENSIONS[file.type] ?? "";
+  const path = `${exhibitionId}/${Date.now()}${extension ? `.${extension}` : ""}`;
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
+
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(path, file, { contentType: file.type });
+  if (error) {
+    throw new Error(`圖片上傳失敗：${error.message}`);
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(bucket).getPublicUrl(path);
+
+  await prisma.exhibition.update({
+    where: { id: exhibitionId },
+    data: { imageUrl: publicUrl },
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/${exhibitionId}/edit`);
 }
