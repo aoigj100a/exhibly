@@ -28,6 +28,47 @@
 - **資料庫**：開發環境 Docker PostgreSQL / 正式環境 Supabase PostgreSQL
 - **部署**：Vercel
 
+## 系統架構
+
+```mermaid
+flowchart LR
+  visitor["訪客"]
+  owner["管理者"]
+
+  subgraph vercel["Vercel"]
+    web["apps/web<br/>Server Components"]
+    subgraph adminApp["apps/admin"]
+      login["登入頁<br/>signIn 白名單"]
+      adminPages["後台頁面<br/>Server Components"]
+      guard{"requireAuth()"}
+      actions["Server Actions"]
+    end
+  end
+
+  subgraph supabase["Supabase"]
+    db[("PostgreSQL")]
+    storage["Storage"]
+  end
+
+  github["GitHub OAuth"]
+
+  visitor -->|"瀏覽"| web
+  visitor -->|"訪客模式（唯讀）"| adminPages
+  web -->|"Prisma 讀取"| db
+  web -.->|"next/image 載入圖片"| storage
+
+  owner --> login
+  login <-->|"OAuth 登入"| github
+  owner --> adminPages
+  adminPages -->|"Prisma 讀取"| db
+  adminPages -->|"送出表單"| guard
+  guard -->|"有 session 才放行"| actions
+  actions -->|"Prisma 寫入"| db
+  actions -->|"上傳圖片 service role key"| storage
+```
+
+web 與 admin 之間沒有 API 層：兩者都透過 `packages/db` 的 Prisma client 直連同一個 Supabase PostgreSQL，web 只讀、admin 的寫入集中在 Server Actions。每一支 Server Action 開頭都呼叫 `requireAuth()`，而只有通過 GitHub 登入、且 email 符合 `signIn` callback 白名單的人才會拿到 session。
+
 ## 技術決策
 
 ### 網址正規化：從「補上 https://」改為白名單
